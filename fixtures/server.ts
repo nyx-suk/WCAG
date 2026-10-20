@@ -82,6 +82,10 @@ export function createFixtureApp(): Express {
   app.get("/tc3", (_req: Request, res: Response) => {
     res.sendFile(path.join(PAGES_DIR, "tc3.html"));
   });
+  // TC4 fixture page
+  app.get("/tc4", (_req: Request, res: Response) => {
+    res.sendFile(path.join(PAGES_DIR, "tc4-broken.html"));
+  });
 
   app.get("/assets/tc3-photo.svg", (_req: Request, res: Response) => {
     res.sendFile(path.join(ASSETS_DIR, "tc3-photo.svg"));
