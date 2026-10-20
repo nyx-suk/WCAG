@@ -3,3 +3,9 @@ dist/
 .DS_Store
 evidence/*
 !evidence/.gitkeep
+!evidence/screenshots/
+evidence/screenshots/*
+!evidence/screenshots/.gitkeep
+!evidence/recordings/
+evidence/recordings/*
+!evidence/recordings/.gitkeep
