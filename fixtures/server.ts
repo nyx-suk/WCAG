@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PAGES_DIR = path.resolve(__dirname, "pages");
+const ASSETS_DIR = path.resolve(__dirname, "assets");
 
 export interface FixtureServerState {
   tc2Fixed: boolean;
@@ -75,6 +76,15 @@ export function createFixtureApp(): Express {
   app.get("/tc2", (_req: Request, res: Response) => {
     const filename = serverState.tc2Fixed ? "tc2-fixed.html" : "tc2-broken.html";
     res.sendFile(path.join(PAGES_DIR, filename));
+  });
+
+  // TC3 fixture page
+  app.get("/tc3", (_req: Request, res: Response) => {
+    res.sendFile(path.join(PAGES_DIR, "tc3.html"));
+  });
+
+  app.get("/assets/tc3-photo.svg", (_req: Request, res: Response) => {
+    res.sendFile(path.join(ASSETS_DIR, "tc3-photo.svg"));
   });
 
   return app;
