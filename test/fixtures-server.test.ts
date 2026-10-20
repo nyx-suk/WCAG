@@ -26,12 +26,14 @@ test("fixtures server endpoints and state toggling", async (t) => {
   const tc1BadRes = await fetch(`${BASE_URL}/tc1/bad`);
   assert.equal(tc1BadRes.status, 200);
   const tc1BadHtml = await tc1BadRes.text();
-  assert.match(tc1BadHtml, /TC1: Modal Keyboard Trap/);
+  assert.match(tc1BadHtml, /Weekly Tech Digest/);
+  assert.match(tc1BadHtml, /Open newsletter signup/);
 
   const tc1GoodRes = await fetch(`${BASE_URL}/tc1/good`);
   assert.equal(tc1GoodRes.status, 200);
   const tc1GoodHtml = await tc1GoodRes.text();
-  assert.match(tc1GoodHtml, /TC1: Accessible Modal/);
+  assert.match(tc1GoodHtml, /Weekly Tech Digest/);
+  assert.match(tc1GoodHtml, /Open newsletter signup/);
 
   // 3. /tc2 initial state (broken)
   const stateRes1 = await fetch(`${BASE_URL}/__state/tc2`);

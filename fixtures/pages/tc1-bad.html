@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Tech Digest — Newsletter Signup (Trap)</title>
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary-bg: #f1f5f9;
+      --secondary-hover: #e2e8f0;
+      --border-color: #cbd5e1;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-bg);
+      color: var(--text-main);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--secondary-hover);
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(15, 23, 42, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.hidden {
+      display: none;
+    }
+
+    /* Modal Card */
+    .modal-dialog {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 480px;
+      padding: 32px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-dialog h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-dialog p {
+      font-size: 0.925rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="email"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Weekly Tech Digest</h1>
+    <p>
+      Join over 40,000 software engineers receiving our weekly breakdown of system architecture, 
+      modern web standards, and developer tooling.
+    </p>
+    <button id="open-newsletter-btn" class="btn btn-primary" type="button">Open newsletter signup</button>
+  </div>
+
+  <!--
+    INTENTIONAL ACCESSIBILITY DEFECTS (TC1 KEYBOARD TRAP):
+    1. Trap containment: Focus cycles continuously between the email input and the two buttons.
+    2. Escape key ignored: No keydown listener responds to the Escape key.
+    3. Dismissal buttons bound to 'mousedown': Keyboard users pressing Enter or Space fire keydown/click
+       events, which never trigger 'mousedown'. Thus, neither "Maybe later" nor "Subscribe" can dismiss
+       the modal via keyboard.
+    4. Mouse backdrop click: Mouse users can click the dark backdrop to dismiss, but keyboard users
+       have zero means to escape the modal.
+  -->
+  <div id="newsletter-backdrop" class="modal-backdrop hidden" aria-hidden="true">
+    <div id="newsletter-modal" class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+      <h2 id="modal-heading">Subscribe to our Newsletter</h2>
+      <p>Stay up to date with the latest technical articles, tutorials, and engineering podcasts.</p>
+      
+      <form id="newsletter-form" onsubmit="return false;">
+        <div class="form-group">
+          <label for="newsletter-email">Email Address</label>
+          <input type="email" id="newsletter-email" name="email" placeholder="you@company.com" required autocomplete="email" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="maybe-later-btn" class="btn btn-secondary">Maybe later</button>
+          <button type="submit" id="subscribe-btn" class="btn btn-primary">Subscribe</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const openBtn = document.getElementById("open-newsletter-btn");
+    const backdrop = document.getElementById("newsletter-backdrop");
+    const modal = document.getElementById("newsletter-modal");
+    const emailInput = document.getElementById("newsletter-email");
+    const subscribeBtn = document.getElementById("subscribe-btn");
+    const maybeLaterBtn = document.getElementById("maybe-later-btn");
+
+    function openModal() {
+      backdrop.classList.remove("hidden");
+      backdrop.setAttribute("aria-hidden", "false");
+      emailInput.focus();
+    }
+
+    function closeModal() {
+      backdrop.classList.add("hidden");
+      backdrop.setAttribute("aria-hidden", "true");
+    }
+
+    // Open on click, Enter, or Space
+    openBtn.addEventListener("click", openModal);
+
+    // Mousedown dismissal: works only for mouse clicks, inoperable for keyboard Enter / Space
+    maybeLaterBtn.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      closeModal();
+    });
+
+    subscribeBtn.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      closeModal();
+    });
+
+    // Backdrop dismissal via mouse only
+    backdrop.addEventListener("mousedown", (e) => {
+      if (e.target === backdrop) {
+        closeModal();
+      }
+    });
+
+    // Tab and Shift+Tab focus containment loop (no escape path)
+    const focusableElements = [emailInput, maybeLaterBtn, subscribeBtn];
+
+    modal.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+      // Note: Escape key is intentionally ignored here to create a genuine trap.
+    });
+  </script>
+</body>
+</html>
