@@ -1,0 +1,23 @@
+{
+  "name": "wcag-accessibility-auditor",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "AI-assisted web accessibility auditing agent",
+  "scripts": {
+    "fixtures": "tsx fixtures/server.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/**/*.test.ts"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "express": "^4.21.2",
+    "playwright": "^1.49.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
