@@ -3,15 +3,231 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TC2 - Fixed State</title>
+  <title>ProSound Studio Wireless Headphones — AudioTech Store</title>
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --primary: #1d4ed8;
+      --primary-hover: #1e40af;
+      --secondary-bg: #f1f5f9;
+      --secondary-hover: #e2e8f0;
+      --border-color: #cbd5e1;
+      --success: #15803d;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+    }
+
+    .header-nav {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+
+    .nav-link {
+      color: var(--primary);
+      text-decoration: underline;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .nav-link:hover {
+      color: var(--primary-hover);
+    }
+
+    main {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 24px;
+    }
+
+    .product-card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      padding: 32px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+
+    .description {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-size: 1.05rem;
+      max-width: 640px;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    /* Common button styling */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--secondary-hover);
+    }
+
+    .status-message {
+      min-height: 24px;
+      font-weight: 600;
+      color: var(--success);
+      margin-bottom: 24px;
+    }
+
+    .specs-section {
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+      margin-top: 24px;
+    }
+
+    .specs-section h2 {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+
+    .specs-section p {
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    footer {
+      background-color: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+  </style>
 </head>
 <body>
-  <main>
-    <h1>TC2: Keyboard Operability Fixed</h1>
-    <!-- Real accessible button -->
-    <button id="cta-button" style="padding: 10px 20px; background: #0066cc; color: #fff;">
-      Submit Action
-    </button>
+  <header>
+    <nav class="header-nav" aria-label="Main store navigation">
+      <a href="/tc2" class="brand">AudioTech Store</a>
+      <a href="#product-details" class="nav-link">Skip to product specifications</a>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <article class="product-card">
+      <h1>ProSound Studio Wireless Headphones</h1>
+      <p class="price">$199.99</p>
+      <p class="description">
+        Experience studio-grade acoustics with hybrid active noise cancellation, 
+        custom 40mm neodymium drivers, and plush memory foam ear cushions engineered for all-day comfort.
+      </p>
+
+      <div class="product-actions">
+        <!--
+          TC2 FIXED STATE:
+          "Add to cart" is rendered as a genuine semantic <button> element.
+          It is natively focusable via keyboard Tab and operable with Enter and Space.
+          It passes axe-core automated scans with 0 violations.
+        -->
+        <button type="button" id="add-to-cart" class="btn btn-primary">Add to cart</button>
+        <button type="button" id="wishlist-btn" class="btn btn-secondary">Save to Wishlist</button>
+      </div>
+
+      <div id="cart-status" class="status-message" aria-live="polite"></div>
+
+      <section id="product-details" class="specs-section">
+        <h2>Technical Specifications</h2>
+        <p>Frequency response: 20Hz - 20kHz &bull; Battery: 40 hours with ANC enabled &bull; Bluetooth 5.3</p>
+        <a href="#main-content" class="nav-link">Return to top</a>
+      </section>
+    </article>
   </main>
+
+  <footer>
+    <p>&copy; 2026 AudioTech Store. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const addToCartBtn = document.getElementById("add-to-cart");
+    const statusMsg = document.getElementById("cart-status");
+
+    addToCartBtn.addEventListener("click", () => {
+      statusMsg.textContent = "Added to cart!";
+    });
+  </script>
 </body>
 </html>

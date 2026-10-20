@@ -44,7 +44,8 @@ test("fixtures server endpoints and state toggling", async (t) => {
   const tc2BrokenRes = await fetch(`${BASE_URL}/tc2`);
   assert.equal(tc2BrokenRes.status, 200);
   const tc2BrokenHtml = await tc2BrokenRes.text();
-  assert.match(tc2BrokenHtml, /TC2: Keyboard Operability Failure \(Broken\)/);
+  assert.match(tc2BrokenHtml, /<div id="add-to-cart"/);
+  assert.match(tc2BrokenHtml, /ProSound Studio Wireless Headphones/);
 
   // 4. Toggle TC2 state to fixed
   const updateRes = await fetch(`${BASE_URL}/__state/tc2`, {
@@ -59,7 +60,8 @@ test("fixtures server endpoints and state toggling", async (t) => {
   const tc2FixedRes = await fetch(`${BASE_URL}/tc2`);
   assert.equal(tc2FixedRes.status, 200);
   const tc2FixedHtml = await tc2FixedRes.text();
-  assert.match(tc2FixedHtml, /TC2: Keyboard Operability Fixed/);
+  assert.match(tc2FixedHtml, /<button type="button" id="add-to-cart"/);
+  assert.match(tc2FixedHtml, /ProSound Studio Wireless Headphones/);
 
   // 5. Reset state
   const resetRes = await fetch(`${BASE_URL}/__state/reset`, { method: "POST" });
@@ -67,5 +69,5 @@ test("fixtures server endpoints and state toggling", async (t) => {
 
   const tc2ResetRes = await fetch(`${BASE_URL}/tc2`);
   const tc2ResetHtml = await tc2ResetRes.text();
-  assert.match(tc2ResetHtml, /TC2: Keyboard Operability Failure \(Broken\)/);
+  assert.match(tc2ResetHtml, /<div id="add-to-cart"/);
 });

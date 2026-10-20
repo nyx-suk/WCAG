@@ -5,6 +5,7 @@
   "description": "AI-assisted web accessibility auditing agent",
   "scripts": {
     "fixtures": "tsx fixtures/server.ts",
+    "verify:tc2": "tsx scripts/verify-tc2-axe-clean.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test test/**/*.test.ts"
