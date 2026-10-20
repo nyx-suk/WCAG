@@ -31,6 +31,11 @@ export async function launchBrowser(): Promise<Browser> {
   return browser;
 }
 
+export async function closeBrowser(browser: Browser): Promise<void> {
+  if (browser === defaultBrowser) defaultBrowser = null;
+  await browser.close();
+}
+
 export interface AuditContextOptions {
   record?: {
     dir?: string;
