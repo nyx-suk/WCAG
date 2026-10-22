@@ -2,6 +2,8 @@ import { AxeBuilder } from "@axe-core/playwright";
 import type { Page } from "playwright";
 import { closeBrowser, launchBrowser, navigate, newAuditContext, saveScreenshot } from "./browser";
 import { sampleContrast } from "./contrast-sampler";
+import { runKeyboardTrapCheck } from "./checks/keyboardTrap";
+import { runKeyboardOperabilityCheck } from "./checks/keyboardOperability";
 import type { AuditFinding, AuditInput, AuditResult, CheckId } from "./types";
 import { createStableFindingId } from "../src/audit/finding-id";
 import path from "node:path";
@@ -118,8 +120,29 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
   const browser = await launchBrowser();
   const context = await newAuditContext(browser);
   const page = await context.newPage();
+
   try {
-    await navigate(page, input.url, { checkId: planned[0] ?? "axe" });
+    try {
+      await navigate(page, input.url, { checkId: planned[0] ?? "axe" });
+    } catch (navError) {
+      status = "error";
+      const errorMsg = navError instanceof Error ? navError.message : String(navError);
+      for (const checkId of planned) {
+        checksExecuted.push({ checkId, status: "failed", error: errorMsg });
+      }
+      return {
+        auditId: input.auditId,
+        url: input.url,
+        status,
+        findings,
+        checksPlanned: planned,
+        checksExecuted,
+        axeSummary,
+        startedAt,
+        completedAt: new Date().toISOString(),
+      };
+    }
+
     for (const checkId of planned) {
       if (checkId === "axe") {
         try {
@@ -128,7 +151,11 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
           axeSummary = axe.summary;
           checksExecuted.push({ checkId, status: "executed" });
         } catch (error) {
-          checksExecuted.push({ checkId, status: "failed", error: error instanceof Error ? error.message : String(error) });
+          checksExecuted.push({
+            checkId,
+            status: "failed",
+            error: error instanceof Error ? error.message : String(error),
+          });
           status = "incomplete";
         }
       } else if (checkId === "contrast") {
@@ -137,11 +164,53 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
           if (finding) findings.push(finding);
           checksExecuted.push({ checkId, status: "executed" });
         } catch (error) {
-          checksExecuted.push({ checkId, status: "failed", error: error instanceof Error ? error.message : String(error) });
+          checksExecuted.push({
+            checkId,
+            status: "failed",
+            error: error instanceof Error ? error.message : String(error),
+          });
+          status = "incomplete";
+        }
+      } else if (checkId === "keyboard-trap") {
+        try {
+          const trapFindings = await runKeyboardTrapCheck({
+            url: input.url,
+            auditId: input.auditId,
+            browser,
+          });
+          findings.push(...trapFindings);
+          checksExecuted.push({ checkId, status: "executed" });
+        } catch (error) {
+          checksExecuted.push({
+            checkId,
+            status: "failed",
+            error: error instanceof Error ? error.message : String(error),
+          });
+          status = "incomplete";
+        }
+      } else if (checkId === "keyboard-operability") {
+        try {
+          const operabilityFindings = await runKeyboardOperabilityCheck({
+            url: input.url,
+            auditId: input.auditId,
+            browser,
+          });
+          findings.push(...operabilityFindings);
+          checksExecuted.push({ checkId, status: "executed" });
+        } catch (error) {
+          checksExecuted.push({
+            checkId,
+            status: "failed",
+            error: error instanceof Error ? error.message : String(error),
+          });
           status = "incomplete";
         }
       } else {
-        checksExecuted.push({ checkId, status: "skipped", error: "Unsupported: no keyboard audit implementation is available." });
+        checksExecuted.push({
+          checkId,
+          status: "skipped",
+          error: `Unsupported check ID: ${checkId}`,
+        });
         status = "incomplete";
       }
     }
@@ -149,6 +218,7 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
     await context.close();
     await closeBrowser(browser);
   }
+
   return {
     auditId: input.auditId,
     url: input.url,
