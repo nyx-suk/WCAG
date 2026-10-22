@@ -12,7 +12,7 @@ import { runKeyboardTrapCheck } from "./checks/keyboardTrap";
 import { runKeyboardOperabilityCheck } from "./checks/keyboardOperability";
 import type { AuditFinding, AuditInput, AuditResult, CheckId } from "./types";
 import { ValidationError } from "./errors";
-import { createStableFindingId } from "../src/audit/finding-id";
+import { makeFingerprint } from "./fingerprint";
 import path from "node:path";
 import { EVIDENCE_DIR, writeEvidenceJson } from "./browser";
 
@@ -43,14 +43,10 @@ function axeFinding(input: AuditInput, violation: {
   description: string;
   nodes: Array<{ html: string; target: string[]; failureSummary?: string }>;
 }): AuditFinding {
+  const firstNodeSelector = violation.nodes[0]?.target[0] ?? violation.id;
+  const axeSelectorKey = `${violation.id}|${firstNodeSelector}`;
+  const fingerprint = makeFingerprint("axe", input.url, axeSelectorKey);
   const selector = violation.nodes[0]?.target[0];
-  const fingerprint = createStableFindingId({
-    pageUrl: input.url,
-    source: "axe",
-    ruleId: violation.id,
-    wcagCriteria: [],
-    selector: selector ?? violation.id,
-  }).replace(/^fnd_/, "");
   return {
     title: violation.help,
     description: violation.description,
@@ -135,13 +131,8 @@ async function runContrast(
   });
   await writeEvidenceJson(input.auditId, "contrast", result.evidence);
   if (result.status !== "fail") return undefined;
-  const fingerprint = createStableFindingId({
-    pageUrl: input.url,
-    source: "contrast",
-    ruleId: "1.4.3",
-    wcagCriteria: ["1.4.3"],
-    selector: "#hero-caption",
-  }).replace(/^fnd_/, "");
+  const selector = "#hero-caption";
+  const fingerprint = makeFingerprint("contrast", input.url, selector);
   return {
     title: "Insufficient text contrast",
     description: result.summary,
@@ -150,7 +141,7 @@ async function runContrast(
     source: "contrast",
     checkId: "contrast",
     fingerprint,
-    selector: "#hero-caption",
+    selector,
     screenshot,
     evidence: result.evidence,
   };
@@ -394,11 +385,21 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
     await closeBrowser(browser);
   }
 
+  // Deduplicate findings by fingerprint, keeping the first and preserving order
+  const seenFingerprints = new Set<string>();
+  const deduplicatedFindings: AuditFinding[] = [];
+  for (const finding of findings) {
+    if (!seenFingerprints.has(finding.fingerprint)) {
+      seenFingerprints.add(finding.fingerprint);
+      deduplicatedFindings.push(finding);
+    }
+  }
+
   return {
     auditId: input.auditId,
     url: input.url,
     status,
-    findings,
+    findings: deduplicatedFindings,
     checksPlanned: planned,
     checksExecuted,
     axeSummary,
