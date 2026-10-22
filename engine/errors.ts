@@ -66,3 +66,14 @@ export class CheckFailedError extends Error {
     Object.setPrototypeOf(this, CheckFailedError.prototype);
   }
 }
+
+export class ValidationError extends Error {
+  override readonly cause?: unknown;
+
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = "ValidationError";
+    this.cause = cause;
+    Object.setPrototypeOf(this, ValidationError.prototype);
+  }
+}
