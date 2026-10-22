@@ -10,16 +10,19 @@ const ASSETS_DIR = path.resolve(__dirname, "assets");
 
 export interface FixtureServerState {
   tc2Fixed: boolean;
+  tc4Fixed: boolean;
 }
 
 let serverState: FixtureServerState = {
   tc2Fixed: false,
+  tc4Fixed: false,
 };
 
 let activeServer: http.Server | null = null;
 
 export function resetFixtureState(): void {
   serverState.tc2Fixed = false;
+  serverState.tc4Fixed = false;
 }
 
 export function getFixtureState(): Readonly<FixtureServerState> {
@@ -57,6 +60,20 @@ export function createFixtureApp(): Express {
     res.json({ fixed: serverState.tc2Fixed });
   });
 
+  app.get("/__state/tc4", (_req: Request, res: Response) => {
+    res.json({ fixed: serverState.tc4Fixed });
+  });
+
+  app.post("/__state/tc4", (req: Request, res: Response) => {
+    const { fixed } = req.body ?? {};
+    if (typeof fixed !== "boolean") {
+      res.status(400).json({ error: "Request body must contain boolean 'fixed' property" });
+      return;
+    }
+    serverState.tc4Fixed = fixed;
+    res.json({ fixed: serverState.tc4Fixed });
+  });
+
   // Reset all state to broken
   app.post("/__state/reset", (_req: Request, res: Response) => {
     resetFixtureState();
@@ -84,7 +101,7 @@ export function createFixtureApp(): Express {
   });
   // TC4 fixture page
   app.get("/tc4", (_req: Request, res: Response) => {
-    res.sendFile(path.join(PAGES_DIR, "tc4-broken.html"));
+    res.sendFile(path.join(PAGES_DIR, serverState.tc4Fixed ? "tc4-fixed.html" : "tc4-broken.html"));
   });
 
   app.get("/assets/tc3-photo.svg", (_req: Request, res: Response) => {

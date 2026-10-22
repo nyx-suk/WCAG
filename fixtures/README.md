@@ -12,6 +12,8 @@ npm run fixtures
 - **TC1 Bad:** `http://localhost:4000/tc1/bad`
 - **TC1 Good:** `http://localhost:4000/tc1/good`
 - **TC2:** `http://localhost:4000/tc2` (serves broken or fixed based on in-memory state)
+- **TC3:** `http://localhost:4000/tc3`
+- **TC4:** `http://localhost:4000/tc4` (serves broken or fixed based on in-memory state)
 
 ## 2. Fixture Mechanisms & Line References
 
@@ -45,7 +47,20 @@ curl http://localhost:4000/__state/tc2
 curl -X POST http://localhost:4000/__state/reset
 ```
 
-## 4. Expected Auditor Findings
+## 4. Toggling TC4 State via cURL
+
+```bash
+# Toggle TC4 to fixed
+curl -X POST http://localhost:4000/__state/tc4 -H "Content-Type: application/json" -d '{"fixed":true}'
+
+# Check current state
+curl http://localhost:4000/__state/tc4
+
+# Reset back to broken
+curl -X POST http://localhost:4000/__state/reset
+```
+
+## 5. Expected Auditor Findings
 
 | Fixture Page | Expected Findings | Target WCAG Rules | Outcome |
 | :--- | :--- | :--- | :--- |
@@ -53,3 +68,6 @@ curl -X POST http://localhost:4000/__state/reset
 | **TC1 Good** (`/tc1/good`) | 0 findings | — | Pass (containment + escape) |
 | **TC2 Broken** (`/tc2`) | 2 findings (Serious) | **WCAG 2.1.1** Keyboard, **WCAG 4.1.2** Name, Role, Value | Failure with element evidence |
 | **TC2 Fixed** (`/tc2`) | 0 findings | — | Pass (axe-clean & operable) |
+| **TC3** (`/tc3`) | 1 finding (Serious) | **WCAG 1.4.3** Contrast (Minimum) | Failure with screenshot-pixel evidence |
+| **TC4 Broken** (`/tc4`) | 1 finding (Serious) | **WCAG 2.1.1** Keyboard | Failure with keyboard evidence |
+| **TC4 Fixed** (`/tc4`) | 0 findings | — | Pass after retest |

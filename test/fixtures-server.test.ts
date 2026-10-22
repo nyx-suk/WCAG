@@ -70,4 +70,19 @@ test("fixtures server endpoints and state toggling", async (t) => {
   const tc2ResetRes = await fetch(`${BASE_URL}/tc2`);
   const tc2ResetHtml = await tc2ResetRes.text();
   assert.match(tc2ResetHtml, /<div id="add-to-cart"/);
+
+  const tc4BrokenRes = await fetch(`${BASE_URL}/tc4`);
+  assert.equal(tc4BrokenRes.status, 200);
+  assert.match(await tc4BrokenRes.text(), /onclick/);
+
+  const tc4UpdateRes = await fetch(`${BASE_URL}/__state/tc4`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fixed: true }),
+  });
+  assert.equal(tc4UpdateRes.status, 200);
+  assert.deepEqual(await tc4UpdateRes.json(), { fixed: true });
+
+  const tc4FixedRes = await fetch(`${BASE_URL}/tc4`);
+  assert.match(await tc4FixedRes.text(), /<button type="button" id="next-step"/);
 });
