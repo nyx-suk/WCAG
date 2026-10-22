@@ -7,7 +7,7 @@ import { runKeyboardOperabilityCheck } from "./checks/keyboardOperability";
 import type { AuditFinding, AuditInput, AuditResult, CheckId } from "./types";
 import { createStableFindingId } from "../src/audit/finding-id";
 import path from "node:path";
-import { EVIDENCE_DIR } from "./browser";
+import { EVIDENCE_DIR, writeEvidenceJson } from "./browser";
 
 const allChecks: CheckId[] = ["axe", "keyboard-trap", "keyboard-operability", "contrast"];
 
@@ -79,7 +79,7 @@ async function runContrast(page: Page, input: AuditInput): Promise<AuditFinding 
   const boundingBox = await target.boundingBox();
   const text = await target.textContent();
   if (!boundingBox || text === null) throw new Error("Contrast target #hero-caption has no rendered bounds or text.");
-  const screenshot = await saveScreenshot(page, `${input.auditId}-contrast`);
+  const screenshot = await saveScreenshot(page, input.auditId, "contrast");
   const result = await sampleContrast({
     checkId: "tc3-contrast",
     pageUrl: input.url,
@@ -88,6 +88,7 @@ async function runContrast(page: Page, input: AuditInput): Promise<AuditFinding 
     wcagCriterion: "1.4.3",
     requiredRatio: 4.5,
   });
+  await writeEvidenceJson(input.auditId, "contrast", result.evidence);
   if (result.status !== "fail") return undefined;
   const fingerprint = createStableFindingId({
     pageUrl: input.url,

@@ -46,6 +46,6 @@ Routes:
 - `POST /api/issues/:id/retest` — rerun the issue's relevant check and persist
   the retest; only a passing result resolves the issue.
 
-The audit runner currently executes axe checks and the TC3 screenshot-pixel
-contrast check. Keyboard trap and keyboard operability checks are reported as
-skipped/unsupported because no keyboard audit implementation exists yet.
+The audit runner executes axe, keyboard trap, keyboard operability, and TC3
+screenshot-pixel contrast checks. TC4 can be toggled between its broken and
+fixed fixture states with the fixture server's `/__state/tc4` endpoint.
