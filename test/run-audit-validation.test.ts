@@ -1,9 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
-import { runAudit } from "../engine/runAudit";
-import { ValidationError } from "../engine/errors";
-import type { AuditInput, CheckId } from "../engine/types";
+import { runAudit, ValidationError, type AuditInput, type CheckId } from "../engine";
 
 test("runAudit validation: auditId rules reject before launching Chromium", async (t) => {
   const launchSpy = t.mock.method(chromium, "launch");

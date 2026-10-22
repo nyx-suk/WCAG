@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { startFixtureServer, stopFixtureServer, resetFixtureState } from "../fixtures/server";
+import { runAudit } from "../engine";
 import {
-  runAudit,
   setCheckTimeoutOverride,
   resetCheckTimeoutOverrides,
   setContrastModuleStub,

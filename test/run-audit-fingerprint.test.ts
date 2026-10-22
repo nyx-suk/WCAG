@@ -1,9 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { startFixtureServer, stopFixtureServer, resetFixtureState } from "../fixtures/server";
-import { runAudit, setContrastModuleStub, resetContrastModulePath } from "../engine/runAudit";
-import { makeFingerprint } from "../engine/fingerprint";
-import type { AuditFinding } from "../engine/types";
+import { runAudit, makeFingerprint, type AuditFinding } from "../engine";
+import { setContrastModuleStub, resetContrastModulePath } from "../engine/runAudit";
 
 const port = 4131;
 

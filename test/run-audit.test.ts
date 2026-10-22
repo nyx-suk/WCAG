@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { startFixtureServer, stopFixtureServer, resetFixtureState } from "../fixtures/server";
-import { runAudit } from "../engine/runAudit";
+import { runAudit } from "../engine";
 
 const port = 4101;
 const baseUrl = `http://localhost:${port}`;
