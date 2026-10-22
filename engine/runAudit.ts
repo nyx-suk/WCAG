@@ -1,7 +1,6 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import type { Page } from "playwright";
 import { closeBrowser, launchBrowser, navigate, newAuditContext, saveScreenshot } from "./browser";
-import { sampleContrast } from "./contrast-sampler";
 import { runKeyboardTrapCheck } from "./checks/keyboardTrap";
 import { runKeyboardOperabilityCheck } from "./checks/keyboardOperability";
 import type { AuditFinding, AuditInput, AuditResult, CheckId } from "./types";
@@ -74,14 +73,35 @@ async function runAxe(page: Page, input: AuditInput): Promise<{
   };
 }
 
-async function runContrast(page: Page, input: AuditInput): Promise<AuditFinding | undefined> {
+export let contrastModulePath = "./contrast-sampler";
+let contrastModuleOverride: unknown = null;
+
+export function setContrastModulePath(customPath: string): void {
+  contrastModulePath = customPath;
+  contrastModuleOverride = null;
+}
+
+export function setContrastModuleStub(stub: unknown): void {
+  contrastModuleOverride = stub;
+}
+
+export function resetContrastModulePath(): void {
+  contrastModulePath = "./contrast-sampler";
+  contrastModuleOverride = null;
+}
+
+async function runContrast(
+  page: Page,
+  input: AuditInput,
+  samplerFn: (options: any) => Promise<any>
+): Promise<AuditFinding | undefined> {
   const target = page.locator("#hero-caption");
   if (await target.count() === 0) return undefined;
   const boundingBox = await target.boundingBox();
   const text = await target.textContent();
   if (!boundingBox || text === null) throw new Error("Contrast target #hero-caption has no rendered bounds or text.");
   const screenshot = await saveScreenshot(page, input.auditId, "contrast");
-  const result = await sampleContrast({
+  const result = await samplerFn({
     checkId: "tc3-contrast",
     pageUrl: input.url,
     screenshot: { kind: "path", path: path.join(EVIDENCE_DIR, screenshot), mimeType: "image/png" },
@@ -222,9 +242,56 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
           status = "incomplete";
         }
       } else if (checkId === "contrast") {
+        /**
+         * Expected contrast check interface:
+         * runContrastCheck(page: Page, input: AuditInput): Promise<AuditFinding[]>
+         *
+         * sampleContrast from ./contrast-sampler is dynamically imported and adapted
+         * to this interface.
+         */
+        const modulePath = process.env.CONTRAST_MODULE_PATH || contrastModulePath;
+        let contrastModule: any;
         try {
-          const finding = await runContrast(page, input);
-          if (finding) findings.push(finding);
+          contrastModule =
+            contrastModuleOverride !== null
+              ? contrastModuleOverride
+              : await import(modulePath);
+        } catch {
+          checksExecuted.push({
+            checkId,
+            status: "skipped",
+            error: "contrast module not available",
+          });
+          status = "incomplete";
+          continue;
+        }
+
+        const runContrastCheckFn = contrastModule?.runContrastCheck;
+        const sampleContrastFn = contrastModule?.sampleContrast;
+
+        if (
+          typeof runContrastCheckFn !== "function" &&
+          typeof sampleContrastFn !== "function"
+        ) {
+          checksExecuted.push({
+            checkId,
+            status: "skipped",
+            error: "contrast module not available",
+          });
+          status = "incomplete";
+          continue;
+        }
+
+        try {
+          if (typeof runContrastCheckFn === "function") {
+            const contrastFindings = await runContrastCheckFn(page, input);
+            if (Array.isArray(contrastFindings)) {
+              findings.push(...contrastFindings);
+            }
+          } else {
+            const finding = await runContrast(page, input, sampleContrastFn);
+            if (finding) findings.push(finding);
+          }
           checksExecuted.push({ checkId, status: "executed" });
         } catch (error) {
           checksExecuted.push({
