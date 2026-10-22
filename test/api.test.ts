@@ -77,6 +77,44 @@ test("audit API validates input, persists findings, and supports approval/reject
   });
 });
 
+test("audit API rejects malformed and unsupported URLs without persisting an audit", async () => {
+  await withApi(async (input) => resultFor(input, false), async (baseUrl) => {
+    for (const url of ["not-a-url", "ftp://example.com/audit"]) {
+      const response = await fetch(`${baseUrl}/api/audits`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, wcagLevel: "AA" }),
+      });
+      assert.equal(response.status, 400);
+      assert.match((await response.json() as { error: string }).error, /url/i);
+    }
+
+    const audits = await (await fetch(`${baseUrl}/api/audits`)).json() as unknown[];
+    assert.equal(audits.length, 0);
+  });
+});
+
+test("audit API persists execution failures and returns HTTP 502", async () => {
+  await withApi(async () => {
+    throw new Error("browser unavailable");
+  }, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/audits`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "https://example.com", wcagLevel: "AA" }),
+    });
+    assert.equal(response.status, 502);
+    assert.equal((await response.json() as { error: string }).error, "browser unavailable");
+
+    const audits = await (await fetch(`${baseUrl}/api/audits`)).json() as Array<{
+      audit: { status: string; result?: { status: string; error?: string } };
+    }>;
+    assert.equal(audits.length, 1);
+    assert.equal(audits[0]?.audit.status, "error");
+    assert.equal(audits[0]?.audit.result?.error, "browser unavailable");
+  });
+});
+
 test("retest API keeps failing issues open and resolves only after a pass", async () => {
   let calls = 0;
   await withApi(async (input) => {

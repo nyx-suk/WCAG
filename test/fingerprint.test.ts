@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { makeFingerprint } from "../engine/fingerprint";
+import { createStableFindingId } from "../src/audit/finding-id";
 
 test("makeFingerprint produces deterministic 16-hex fingerprints", () => {
   const fp1 = makeFingerprint("axe", "https://example.com/test", "#submit-btn");
@@ -30,4 +31,19 @@ test("changing checkId changes the fingerprint", () => {
   const fpB = makeFingerprint("keyboard-operability", "https://example.com/test", "#button");
 
   assert.notEqual(fpA, fpB);
+});
+
+test("stable finding IDs remain deterministic across retests", () => {
+  const identity = {
+    pageUrl: "https://example.com/test#section",
+    source: "axe" as const,
+    ruleId: "color-contrast",
+    wcagCriteria: ["1.4.3"],
+    selector: "#submit-btn",
+  };
+  const first = createStableFindingId(identity);
+  const second = createStableFindingId({ ...identity, pageUrl: "https://example.com/test" });
+
+  assert.equal(first, second);
+  assert.match(first, /^fnd_[0-9a-f]{24}$/);
 });

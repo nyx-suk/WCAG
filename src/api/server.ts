@@ -1,5 +1,6 @@
 import express, { type Express, type Request, type Response } from "express";
 import { randomUUID } from "node:crypto";
+import { ValidationError } from "../../engine/errors";
 import type { AuditInput, AuditResult, CheckId, RunAudit } from "../../engine/types";
 import { AuditStore, type RetestOutcome } from "../persistence/sqlite";
 
@@ -16,14 +17,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function parseAuditInput(body: unknown): Omit<AuditInput, "auditId"> {
   if (!isRecord(body) || typeof body.url !== "string" || !body.url.trim()) {
-    throw new Error("Request body must contain a non-empty 'url'.");
+    throw new ValidationError("Request body must contain a non-empty 'url'.");
+  }
+  try {
+    const parsedUrl = new URL(body.url);
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      throw new ValidationError("Request body 'url' must use the http: or https: protocol.");
+    }
+  } catch (error) {
+    if (error instanceof ValidationError) throw error;
+    throw new ValidationError("Request body 'url' must be a valid HTTP or HTTPS URL.");
   }
   if (body.wcagLevel !== "A" && body.wcagLevel !== "AA" && body.wcagLevel !== "AAA") {
-    throw new Error("Request body must contain wcagLevel 'A', 'AA', or 'AAA'.");
+    throw new ValidationError("Request body must contain wcagLevel 'A', 'AA', or 'AAA'.");
   }
   if (body.checks !== undefined &&
       (!Array.isArray(body.checks) || body.checks.some((check) => !checkIds.includes(check as CheckId)))) {
-    throw new Error("Request body contains an unsupported check.");
+    throw new ValidationError("Request body contains an unsupported check.");
   }
   return {
     url: body.url,
@@ -75,6 +85,10 @@ export function createAuditApp(options: AuditApiOptions): Express {
       options.store.saveAuditResult(result);
       res.status(201).json({ audit: options.store.getAudit(result.auditId), issues: options.store.listIssues(result.auditId) });
     } catch (error) {
+      if (error instanceof ValidationError || (isRecord(error) && error.name === "ValidationError")) {
+        sendError(res, 400, error instanceof Error ? error.message : "Invalid audit input.");
+        return;
+      }
       const result = errorResult(input, error);
       options.store.saveAuditResult(result);
       sendError(res, 502, error instanceof Error ? error.message : "Audit execution failed.");
