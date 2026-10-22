@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title">
+  <title id="title">A hazy mountain landscape at sunset</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8d9eae"/>
+      <stop offset="0.62" stop-color="#b9a58e"/>
+      <stop offset="1" stop-color="#d0b58f"/>
+    </linearGradient>
+    <linearGradient id="mountains" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#786f6a"/>
+      <stop offset="1" stop-color="#a48d79"/>
+    </linearGradient>
+    <linearGradient id="foreground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6f665d"/>
+      <stop offset="1" stop-color="#403f3d"/>
+    </linearGradient>
+    <filter id="soften">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="675" fill="url(#sky)"/>
+  <circle cx="870" cy="205" r="92" fill="#e0bd8d" opacity="0.72" filter="url(#soften)"/>
+  <path d="M0 430 205 250 370 405 560 205 790 425 970 260 1200 430V675H0Z" fill="url(#mountains)" opacity="0.9"/>
+  <path d="M0 500 230 335 430 495 660 315 875 500 1060 350 1200 475V675H0Z" fill="#665f59" opacity="0.92"/>
+  <path d="M0 525 C190 475 315 525 480 500 S800 475 960 515 S1110 500 1200 525 V675 H0Z" fill="url(#foreground)"/>
+  <path d="M0 590 C190 555 345 610 530 575 S880 560 1200 590 V675 H0Z" fill="#353838" opacity="0.8"/>
+</svg>
