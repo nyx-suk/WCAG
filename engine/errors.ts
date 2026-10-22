@@ -1,13 +1,5 @@
 import type { CheckId } from "./types";
 
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ValidationError";
-    Object.setPrototypeOf(this, ValidationError.prototype);
-  }
-}
-
 export interface EngineErrorOptions {
   checkId: CheckId;
   cause?: unknown;
