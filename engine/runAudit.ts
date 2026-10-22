@@ -1,6 +1,13 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import type { Page } from "playwright";
-import { closeBrowser, launchBrowser, navigate, newAuditContext, saveScreenshot } from "./browser";
+import {
+  closeBrowser,
+  launchBrowser,
+  navigate,
+  newAuditContext,
+  saveScreenshot,
+  withTimeout,
+} from "./browser";
 import { runKeyboardTrapCheck } from "./checks/keyboardTrap";
 import { runKeyboardOperabilityCheck } from "./checks/keyboardOperability";
 import type { AuditFinding, AuditInput, AuditResult, CheckId } from "./types";
@@ -10,6 +17,23 @@ import path from "node:path";
 import { EVIDENCE_DIR, writeEvidenceJson } from "./browser";
 
 const allChecks: CheckId[] = ["axe", "keyboard-trap", "keyboard-operability", "contrast"];
+
+export const AXE_TIMEOUT_MS = 30000;
+export const CONTRAST_TIMEOUT_MS = 30000;
+
+let checkTimeoutOverrides: Partial<Record<CheckId, number>> = {};
+
+export function setCheckTimeoutOverride(checkId: CheckId, timeoutMs: number): void {
+  checkTimeoutOverrides[checkId] = timeoutMs;
+}
+
+export function resetCheckTimeoutOverrides(): void {
+  checkTimeoutOverrides = {};
+}
+
+function getCheckTimeout(checkId: CheckId, defaultMs: number): number {
+  return checkTimeoutOverrides[checkId] ?? defaultMs;
+}
 
 function axeFinding(input: AuditInput, violation: {
   id: string;
@@ -229,7 +253,8 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
     for (const checkId of planned) {
       if (checkId === "axe") {
         try {
-          const axe = await runAxe(page, input);
+          const timeoutMs = getCheckTimeout("axe", AXE_TIMEOUT_MS);
+          const axe = await withTimeout(runAxe(page, input), timeoutMs, "axe");
           findings.push(...axe.findings);
           axeSummary = axe.summary;
           checksExecuted.push({ checkId, status: "executed" });
@@ -283,13 +308,22 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
         }
 
         try {
+          const timeoutMs = getCheckTimeout("contrast", CONTRAST_TIMEOUT_MS);
           if (typeof runContrastCheckFn === "function") {
-            const contrastFindings = await runContrastCheckFn(page, input);
+            const contrastFindings = await withTimeout(
+              runContrastCheckFn(page, input),
+              timeoutMs,
+              "contrast"
+            );
             if (Array.isArray(contrastFindings)) {
               findings.push(...contrastFindings);
             }
           } else {
-            const finding = await runContrast(page, input, sampleContrastFn);
+            const finding = await withTimeout(
+              runContrast(page, input, sampleContrastFn),
+              timeoutMs,
+              "contrast"
+            );
             if (finding) findings.push(finding);
           }
           checksExecuted.push({ checkId, status: "executed" });
@@ -345,7 +379,18 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
       }
     }
   } finally {
-    await context.close();
+    try {
+      if (!page.isClosed()) {
+        await page.close();
+      }
+    } catch {
+      // Ignore if page already closed
+    }
+    try {
+      await context.close();
+    } catch {
+      // Ignore if context already closed
+    }
     await closeBrowser(browser);
   }
 
