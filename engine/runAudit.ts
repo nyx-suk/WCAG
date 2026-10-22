@@ -5,6 +5,7 @@ import { sampleContrast } from "./contrast-sampler";
 import { runKeyboardTrapCheck } from "./checks/keyboardTrap";
 import { runKeyboardOperabilityCheck } from "./checks/keyboardOperability";
 import type { AuditFinding, AuditInput, AuditResult, CheckId } from "./types";
+import { ValidationError } from "./errors";
 import { createStableFindingId } from "../src/audit/finding-id";
 import path from "node:path";
 import { EVIDENCE_DIR, writeEvidenceJson } from "./browser";
@@ -112,6 +113,67 @@ async function runContrast(page: Page, input: AuditInput): Promise<AuditFinding 
 }
 
 export async function runAudit(input: AuditInput): Promise<AuditResult> {
+  // 1. Validate auditId: trimmed nonempty string, at most 100 characters, only [A-Za-z0-9._-]
+  if (!input.auditId || typeof input.auditId !== "string" || input.auditId.trim().length === 0) {
+    throw new ValidationError("Invalid auditId: must be a non-empty string");
+  }
+  if (input.auditId.trim() !== input.auditId) {
+    throw new ValidationError("Invalid auditId: must be trimmed without leading or trailing whitespace");
+  }
+  if (input.auditId.length > 100) {
+    throw new ValidationError("Invalid auditId: must be at most 100 characters");
+  }
+  if (!/^[A-Za-z0-9._-]+$/.test(input.auditId)) {
+    throw new ValidationError(
+      "Invalid auditId: must contain only alphanumeric characters, periods, underscores, or hyphens"
+    );
+  }
+
+  // 2. Validate wcagLevel: exactly "A", "AA", or "AAA"
+  if (input.wcagLevel !== "A" && input.wcagLevel !== "AA" && input.wcagLevel !== "AAA") {
+    throw new ValidationError(
+      `Invalid wcagLevel: expected 'A', 'AA', or 'AAA', received '${String(input.wcagLevel)}'`
+    );
+  }
+
+  // 3. Validate url: parse with new URL(); wrap parse errors; allow only http: and https:
+  if (!input.url || typeof input.url !== "string") {
+    throw new ValidationError("Invalid url: must be a non-empty string");
+  }
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(input.url);
+  } catch (err) {
+    throw new ValidationError(
+      `Invalid URL: ${err instanceof Error ? err.message : String(err)}`,
+      err
+    );
+  }
+  if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+    throw new ValidationError(
+      `Invalid URL protocol: '${parsedUrl.protocol}'. Only http: and https: are allowed.`
+    );
+  }
+
+  // 4. Validate checks (if provided): nonempty array of known IDs, with no duplicates
+  if (input.checks !== undefined) {
+    if (!Array.isArray(input.checks) || input.checks.length === 0) {
+      throw new ValidationError("Invalid checks: must be a non-empty array of check IDs");
+    }
+    const seenChecks = new Set<CheckId>();
+    for (const check of input.checks) {
+      if (!allChecks.includes(check as CheckId)) {
+        throw new ValidationError(
+          `Invalid check ID: '${String(check)}'. Known IDs are: ${allChecks.join(", ")}`
+        );
+      }
+      if (seenChecks.has(check as CheckId)) {
+        throw new ValidationError(`Duplicate check ID: '${String(check)}'`);
+      }
+      seenChecks.add(check as CheckId);
+    }
+  }
+
   const startedAt = new Date().toISOString();
   const planned = input.checks ?? allChecks;
   const checksExecuted: AuditResult["checksExecuted"] = [];
