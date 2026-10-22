@@ -1,19 +1,15 @@
+import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
-import { chromium, type Browser } from "playwright";
-import {
-  EVIDENCE_DIR,
-  launchBrowser,
-  navigate,
-  newAuditContext,
-  saveScreenshot,
-} from "../engine/browser";
-import { sampleContrast } from "../engine/contrast-sampler";
+import { launchBrowser, navigate, newAuditContext } from "../engine/browser";
+import { highlightElement, saveScreenshot, writeEvidenceJson } from "../engine/evidence";
+import { runAudit } from "../engine";
 import { startFixtureServer, stopFixtureServer } from "../fixtures/server";
+import type { AuditFinding, AuditResult } from "../engine";
 
 const PORT = Number(process.env.FIXTURE_PORT) || 4000;
 const BASE_URL = `http://localhost:${PORT}`;
-const SCREENSHOT_NAME = "tc3-contrast-verification.png";
+const AUDIT_ID = `official-tc3-${Date.now()}`;
 
 async function isServerRunning(): Promise<boolean> {
   try {
@@ -24,10 +20,15 @@ async function isServerRunning(): Promise<boolean> {
   }
 }
 
+async function requireEvidence(relativePath: string | undefined): Promise<string> {
+  if (!relativePath) throw new Error("TC3 finding is missing required screenshot evidence.");
+  const absolutePath = path.join(path.resolve("evidence"), relativePath);
+  await fs.access(absolutePath);
+  return relativePath;
+}
+
 async function run(): Promise<void> {
   let server: http.Server | null = null;
-  let browser: Browser | null = null;
-  let context: Awaited<ReturnType<typeof newAuditContext>> | null = null;
 
   try {
     if (!(await isServerRunning())) {
@@ -37,49 +38,56 @@ async function run(): Promise<void> {
       }
     }
 
-    browser = await launchBrowser();
-    context = await newAuditContext(browser);
-    const page = await context.newPage();
-    await navigate(page, `${BASE_URL}/tc3`, { checkId: "contrast" });
-    await page.locator("main.hero img").waitFor({ state: "visible" });
-    await page.waitForFunction(() => {
-      const image = document.querySelector("main.hero img");
-      return image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0;
+    const result = await runAudit({
+      auditId: AUDIT_ID,
+      url: `${BASE_URL}/tc3`,
+      wcagLevel: "AA",
+      checks: ["contrast"],
     });
-
-    const caption = page.locator("#hero-caption");
-    const boundingBox = await caption.boundingBox();
-    const text = await caption.textContent();
-    if (!boundingBox || text === null) {
-      throw new Error("Could not determine #hero-caption text or bounding box");
+    const finding = result.findings[0] as AuditFinding | undefined;
+    const evidence = finding?.evidence as {
+      measuredRatio?: number;
+      requiredRatio?: number;
+      samples?: unknown[];
+    } | undefined;
+    if (result.status !== "complete" || result.findings.length !== 1 || finding?.checkId !== "contrast") {
+      throw new Error(`TC3 expected one complete contrast finding, got ${result.status} with ${result.findings.length} findings.`);
     }
+    if (evidence?.measuredRatio === undefined || evidence.measuredRatio < 1.68 || evidence.measuredRatio > 1.70) {
+      throw new Error(`TC3 expected a measured contrast ratio near 1.69:1, got ${evidence?.measuredRatio ?? "missing"}.`);
+    }
+    if (evidence.requiredRatio !== 4.5 || !evidence.samples?.length) {
+      throw new Error("TC3 contrast evidence is missing the 4.5:1 threshold or sampled coordinates.");
+    }
+    const screenshot = await requireEvidence(finding.screenshot);
 
-    const screenshotPath = await saveScreenshot(page, SCREENSHOT_NAME, { fullPage: false });
-    const result = await sampleContrast({
-      checkId: "tc3-contrast",
-      pageUrl: `${BASE_URL}/tc3`,
-      screenshot: {
-        kind: "path",
-        path: path.join(EVIDENCE_DIR, screenshotPath),
-        mimeType: "image/png",
-      },
-      target: { selector: "#hero-caption", text, boundingBox },
-      wcagCriterion: "1.4.3",
-      requiredRatio: 4.5,
-    });
-
-    console.log(`Text: ${text}`);
-    console.log(`Contrast ratio: ${result.evidence.measuredRatio?.toFixed(2) ?? "incomplete"}`);
-    console.log(`Threshold: ${result.evidence.requiredRatio}:1`);
-    console.log(`Result: ${result.status.toUpperCase()}`);
-    console.log(`Screenshot: ${path.join(EVIDENCE_DIR, screenshotPath)}`);
-
-    if (result.status === "incomplete") {
-      throw new Error(`TC3 contrast sampling incomplete: ${result.summary}`);
+    const browser = await launchBrowser();
+    const context = await newAuditContext(browser);
+    const page = await context.newPage();
+    try {
+      await navigate(page, `${BASE_URL}/tc3`, { checkId: "contrast" });
+      const cleanup = await highlightElement(page, "#hero-caption");
+      const annotatedScreenshot = await saveScreenshot(page, AUDIT_ID, "contrast-annotated");
+      await cleanup();
+      await context.close();
+      await browser.close();
+      await requireEvidence(annotatedScreenshot);
+      const report = {
+        input: { url: `${BASE_URL}/tc3`, wcagLevel: "AA", checks: ["contrast"] },
+        expected: { status: "complete", findingCount: 1, measuredRatio: "1.69:1", requiredRatio: "4.5:1" },
+        actual: result,
+        sampledCoordinates: evidence.samples,
+        evidence: { screenshot, annotatedScreenshot },
+        verdict: "PASS",
+      };
+      const reportPath = await writeEvidenceJson(AUDIT_ID, "official-report", report);
+      console.log(JSON.stringify({ auditId: AUDIT_ID, report: reportPath, verdict: report.verdict }, null, 2));
+    } finally {
+      if (!page.isClosed()) await page.close();
+      if (!context.browser()?.isConnected()) return;
+      await browser.close();
     }
   } finally {
-    if (context) await context.close();
-    if (browser) await browser.close();
     if (server) await stopFixtureServer(server);
   }
 }
