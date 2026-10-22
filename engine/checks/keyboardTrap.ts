@@ -4,11 +4,14 @@ import path from "node:path";
 import {
   newAuditContext,
   navigate,
-  finalizeVideo,
-  saveScreenshot,
   withTimeout,
   EVIDENCE_DIR,
 } from "../browser";
+import {
+  saveScreenshot,
+  finalizeVideo,
+  writeEvidenceJson,
+} from "../evidence";
 import { makeFingerprint } from "../fingerprint";
 import { CheckFailedError } from "../errors";
 import type { AuditFinding, KeyboardTrapEvidence } from "../types";
@@ -364,13 +367,14 @@ export async function runKeyboardTrapCheck(
           modalStillOpenAfterEscape &&
           !dismissControlsWorked
         ) {
-          // Take trapped-state screenshot
+          // Take trapped-state screenshot under /evidence/{auditId}/
           const screenshotPath = await saveScreenshot(
             page,
-            `${ctx.auditId}-keyboard-trap`
+            ctx.auditId,
+            "keyboard-trap"
           );
 
-          // Finalize browser recording
+          // Finalize browser recording under /evidence/{auditId}/
           videoRelPath = await finalizeVideo(
             page,
             context,
@@ -390,6 +394,9 @@ export async function runKeyboardTrapCheck(
             dismissControlsFound,
             dismissControlsWorked,
           };
+
+          // Write raw detection evidence JSON beside screenshot
+          await writeEvidenceJson(ctx.auditId, "keyboard-trap", evidence);
 
           const finding: AuditFinding = {
             title: "Keyboard trap in modal dialog",

@@ -4,11 +4,15 @@ import path from "node:path";
 import {
   newAuditContext,
   navigate,
-  finalizeVideo,
-  saveScreenshot,
   withTimeout,
   EVIDENCE_DIR,
 } from "../browser";
+import {
+  saveScreenshot,
+  finalizeVideo,
+  highlightElement,
+  writeEvidenceJson,
+} from "../evidence";
 import { makeFingerprint } from "../fingerprint";
 import { CheckFailedError } from "../errors";
 import type { AuditFinding, KeyboardOperabilityEvidence } from "../types";
@@ -265,32 +269,17 @@ export async function runKeyboardOperabilityCheck(
         // Step 4: Report only candidates that respond to mouse clicks but are NOT keyboard reachable
         if (isActionable && !reachableByTab) {
           // Temporarily outline the offending element for visual evidence
-          await page.evaluate(`
-            ((sel) => {
-              const el = document.querySelector(sel);
-              if (el) {
-                el.dataset.oldOutline = el.style.outline;
-                el.style.outline = "3px solid #dc2626";
-                el.style.outlineOffset = "2px";
-              }
-            })(${JSON.stringify(cand.selector)})
-          `);
-
-          const screenshotPath = await saveScreenshot(
-            page,
-            `${ctx.auditId}-operability-${index}`
-          );
-
-          // Restore element outline
-          await page.evaluate(`
-            ((sel) => {
-              const el = document.querySelector(sel);
-              if (el) {
-                el.style.outline = el.dataset.oldOutline || "";
-                delete el.dataset.oldOutline;
-              }
-            })(${JSON.stringify(cand.selector)})
-          `);
+          const cleanupHighlight = await highlightElement(page, cand.selector);
+          let screenshotPath: string;
+          try {
+            screenshotPath = await saveScreenshot(
+              page,
+              ctx.auditId,
+              `operability-${index}`
+            );
+          } finally {
+            await cleanupHighlight();
+          }
 
           // Finalize Tab-walk video recording if not yet finalized
           if (!videoRelPath) {
@@ -315,6 +304,9 @@ export async function runKeyboardOperabilityCheck(
             enterActivated,
             spaceActivated,
           };
+
+          // Write raw detection evidence JSON beside screenshot
+          await writeEvidenceJson(ctx.auditId, `operability-${index}`, evidence);
 
           findings.push({
             title: "Custom control is not keyboard operable",

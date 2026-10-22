@@ -46,15 +46,15 @@ test("browser harness: recording, screenshots, navigation, and timeouts", async 
   await page.keyboard.press("Tab"); // cycles back to newsletter-email
 
   // Test saveScreenshot()
-  const screenshotRelPath = await saveScreenshot(page, `${auditId}-screen`);
-  assert.equal(screenshotRelPath, path.join("screenshots", `${auditId}-screen.png`));
+  const screenshotRelPath = await saveScreenshot(page, auditId, "screen");
+  assert.equal(screenshotRelPath, path.join(auditId, "screen.png"));
   const screenshotFullPath = path.join(EVIDENCE_DIR, screenshotRelPath);
   const screenshotStat = await fs.stat(screenshotFullPath);
   assert.ok(screenshotStat.size > 0, "Screenshot should not be empty");
 
   // Test finalizeVideo()
   const videoRelPath = await finalizeVideo(page, context, auditId, checkId);
-  assert.equal(videoRelPath, path.join("recordings", `${auditId}-${checkId}.webm`));
+  assert.equal(videoRelPath, path.join(auditId, `${checkId}.webm`));
 
   const videoFullPath = path.join(EVIDENCE_DIR, videoRelPath);
   const videoStat = await fs.stat(videoFullPath);

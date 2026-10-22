@@ -14,7 +14,8 @@ import type { CheckId } from "./types";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const EVIDENCE_DIR = path.resolve(__dirname, "..", "evidence");
+import { EVIDENCE_DIR } from "./evidence";
+
 export const SCREENSHOTS_DIR = path.join(EVIDENCE_DIR, "screenshots");
 export const RECORDINGS_DIR = path.join(EVIDENCE_DIR, "recordings");
 
@@ -134,77 +135,16 @@ export async function navigate(
   }
 }
 
-/**
- * Close page and context to finalize video recording, then rename the file
- * to {auditId}-{checkId}.webm under /evidence/recordings and return its relative path.
- */
-export async function finalizeVideo(
-  page: Page,
-  context: BrowserContext,
-  auditId: string,
-  checkId: CheckId
-): Promise<string> {
-  const video = page.video();
-
-  // Close page first to flush Playwright video file buffer
-  if (!page.isClosed()) {
-    await page.close();
-  }
-  // Close context to finalize writing
-  await context.close();
-
-  if (!video) {
-    throw new Error(
-      `No video recording found for check '${checkId}'. Make sure newAuditContext was called with record options.`
-    );
-  }
-
-  const tempPath = await video.path();
-  await fs.mkdir(RECORDINGS_DIR, { recursive: true });
-
-  const targetFilename = `${auditId}-${checkId}.webm`;
-  const targetPath = path.join(RECORDINGS_DIR, targetFilename);
-
-  // If tempPath is different, move/rename it
-  if (path.resolve(tempPath) !== path.resolve(targetPath)) {
-    try {
-      await fs.unlink(targetPath);
-    } catch {
-      // Target does not exist yet; safe to proceed
-    }
-    await fs.rename(tempPath, targetPath);
-  }
-
-  // Return path relative to /evidence
-  return path.join("recordings", targetFilename);
-}
-
-export interface ScreenshotOptions {
-  element?: Locator;
-  fullPage?: boolean;
-}
-
-/**
- * Save PNG screenshot under /evidence/screenshots and return the path relative to /evidence.
- */
-export async function saveScreenshot(
-  page: Page,
-  name: string,
-  opts?: ScreenshotOptions
-): Promise<string> {
-  await fs.mkdir(SCREENSHOTS_DIR, { recursive: true });
-  const filename = name.endsWith(".png") ? name : `${name}.png`;
-  const targetPath = path.join(SCREENSHOTS_DIR, filename);
-
-  if (opts?.element) {
-    await opts.element.screenshot({ path: targetPath });
-  } else {
-    await page.screenshot({ path: targetPath, fullPage: opts?.fullPage ?? false });
-  }
-
-  // Return path relative to /evidence
-  return path.join("screenshots", filename);
-}
+export {
+  EVIDENCE_DIR,
+  buildEvidenceDir,
+  saveScreenshot,
+  finalizeVideo,
+  highlightElement,
+  writeEvidenceJson,
+  describeFinding,
+  type ScreenshotOptions,
+} from "./evidence";
 
 /**
  * Enforce a timeout on a promise.

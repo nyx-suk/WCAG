@@ -2,6 +2,7 @@ import http from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { launchBrowser, EVIDENCE_DIR } from "../engine/browser";
+import { describeFinding } from "../engine/evidence";
 import { runKeyboardTrapCheck } from "../engine/checks/keyboardTrap";
 import { startFixtureServer, stopFixtureServer } from "../fixtures/server";
 
@@ -38,13 +39,16 @@ async function main(): Promise<void> {
     console.log("Testing TC1 Bad: Inescapable Modal Trap");
     console.log("==================================================");
 
+    const badAuditId = `dev-tc1-bad-${Date.now()}`;
     const badFindings = await runKeyboardTrapCheck({
       url: `${BASE_URL}/tc1/bad`,
-      auditId: `dev-tc1-bad-${Date.now()}`,
+      auditId: badAuditId,
       browser,
     });
 
     console.log(`Bad page findings count: ${badFindings.length}`);
+    let filesVerified = false;
+
     if (badFindings.length > 0) {
       const f = badFindings[0];
       console.log(`- Title:       ${f.title}`);
@@ -55,21 +59,32 @@ async function main(): Promise<void> {
       console.log(`- Screenshot:  ${f.screenshot}`);
       console.log(`- Recording:   ${f.recording}`);
 
-      const ev = f.evidence as any;
-      console.log(`- Evidence:`);
-      console.log(`  * Cycle detected: ${ev.cycleDetected} (length: ${ev.cycleLength})`);
-      console.log(`  * Escape pressed: ${ev.escapePressed}`);
-      console.log(`  * Still open after escape: ${ev.modalStillOpenAfterEscape}`);
-      console.log(`  * Controls tried: ${JSON.stringify(ev.dismissControlsFound)}`);
-      console.log(`  * Controls worked: ${ev.dismissControlsWorked}`);
-      console.log(`  * Tab sequence sample (first 4):`, ev.tabSequence?.slice(0, 4));
+      console.log("\n--- Jargon-Free Finding Description ---");
+      console.log(describeFinding(f));
+      console.log("---------------------------------------\n");
 
-      // Verify recording exists and is non-empty
+      // Verify screenshot file exists under /evidence/{auditId}/
+      if (f.screenshot) {
+        const fullScreenPath = path.join(EVIDENCE_DIR, f.screenshot);
+        const screenStat = await fs.stat(fullScreenPath);
+        console.log(`  * Screenshot verified: ${f.screenshot} (${screenStat.size} bytes)`);
+      }
+
+      // Verify recording file exists under /evidence/{auditId}/
       if (f.recording) {
         const fullRecPath = path.join(EVIDENCE_DIR, f.recording);
-        const stat = await fs.stat(fullRecPath);
-        console.log(`  * Recording verified: ${fullRecPath} (${stat.size} bytes)`);
+        const recStat = await fs.stat(fullRecPath);
+        console.log(`  * Recording verified:  ${f.recording} (${recStat.size} bytes)`);
       }
+
+      // Verify raw JSON evidence file exists under /evidence/{auditId}/
+      const jsonEvidencePath = path.join(EVIDENCE_DIR, badAuditId, "keyboard-trap.json");
+      const jsonStat = await fs.stat(jsonEvidencePath);
+      console.log(`  * Evidence JSON verified: ${badAuditId}/keyboard-trap.json (${jsonStat.size} bytes)`);
+
+      const screenshotInDir = f.screenshot?.startsWith(`${badAuditId}/`);
+      const recordingInDir = f.recording?.startsWith(`${badAuditId}/`);
+      filesVerified = Boolean(screenshotInDir && recordingInDir);
     }
 
     console.log("\n==================================================");
@@ -95,16 +110,16 @@ async function main(): Promise<void> {
       badFindings.length === 1 &&
       badFindings[0].severity === "critical" &&
       badFindings[0].wcagRule === "2.1.2 No Keyboard Trap" &&
-      Boolean(badFindings[0].recording);
+      filesVerified;
 
     const goodPassed = goodFindings.length === 0;
 
     if (badPassed && goodPassed) {
-      console.log("SUCCESS: TC1 Bad produced 1 critical trap finding; TC1 Good produced 0 findings.");
+      console.log("SUCCESS: TC1 Bad grouped evidence under /evidence/{auditId}/ with existing files; TC1 Good passed.");
       process.exit(0);
     } else {
       console.error(
-        `FAILURE: TC1 results mismatch (Bad findings: ${badFindings.length}, Good findings: ${goodFindings.length})`
+        `FAILURE: TC1 results mismatch (Bad findings: ${badFindings.length}, Files verified: ${filesVerified}, Good findings: ${goodFindings.length})`
       );
       process.exit(1);
     }

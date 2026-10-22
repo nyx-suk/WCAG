@@ -2,6 +2,7 @@ import http from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { launchBrowser, EVIDENCE_DIR, newAuditContext, navigate } from "../engine/browser";
+import { describeFinding } from "../engine/evidence";
 import { runKeyboardOperabilityCheck } from "../engine/checks/keyboardOperability";
 import { runAxeCheck } from "../engine/checks/axe";
 import { startFixtureServer, stopFixtureServer } from "../fixtures/server";
@@ -66,15 +67,17 @@ async function main(): Promise<void> {
       process.exit(1);
     }
 
+    const brokenAuditId = `dev-tc2-broken-${Date.now()}`;
     // Run keyboard operability check on broken page
     const brokenFindings = await runKeyboardOperabilityCheck({
       url: `${BASE_URL}/tc2`,
-      auditId: `dev-tc2-broken-${Date.now()}`,
+      auditId: brokenAuditId,
       browser,
     });
 
     console.log(`Broken page keyboard findings count: ${brokenFindings.length}`);
     const foundAddToCart = brokenFindings.some((f) => f.selector === "#add-to-cart");
+    let filesVerified = false;
 
     if (brokenFindings.length > 0) {
       for (const f of brokenFindings) {
@@ -85,19 +88,32 @@ async function main(): Promise<void> {
         console.log(`- Screenshot:  ${f.screenshot}`);
         console.log(`- Recording:   ${f.recording}`);
 
-        const ev = f.evidence as any;
-        console.log(`- Evidence:`);
-        console.log(`  * Cursor pointer:    ${ev.cursorPointer}`);
-        console.log(`  * Has click handler: ${ev.hasClickHandler}`);
-        console.log(`  * Reachable by Tab:  ${ev.reachableByTab}`);
-        console.log(`  * Tabs pressed:      ${ev.tabsPressed}`);
-        console.log(`  * Enter activated:   ${ev.enterActivated}`);
-        console.log(`  * Space activated:   ${ev.spaceActivated}`);
+        console.log("\n--- Jargon-Free Finding Description ---");
+        console.log(describeFinding(f));
+        console.log("---------------------------------------\n");
 
-        if (f.recording) {
-          const recStat = await fs.stat(path.join(EVIDENCE_DIR, f.recording));
-          console.log(`  * Recording verified (${recStat.size} bytes)`);
+        // Verify screenshot file exists under /evidence/{auditId}/
+        if (f.screenshot) {
+          const fullScreenPath = path.join(EVIDENCE_DIR, f.screenshot);
+          const screenStat = await fs.stat(fullScreenPath);
+          console.log(`  * Screenshot verified: ${f.screenshot} (${screenStat.size} bytes)`);
         }
+
+        // Verify recording file exists under /evidence/{auditId}/
+        if (f.recording) {
+          const fullRecPath = path.join(EVIDENCE_DIR, f.recording);
+          const recStat = await fs.stat(fullRecPath);
+          console.log(`  * Recording verified:  ${f.recording} (${recStat.size} bytes)`);
+        }
+
+        // Verify raw JSON evidence file exists under /evidence/{auditId}/
+        const jsonEvidencePath = path.join(EVIDENCE_DIR, brokenAuditId, "operability-0.json");
+        const jsonStat = await fs.stat(jsonEvidencePath);
+        console.log(`  * Evidence JSON verified: ${brokenAuditId}/operability-0.json (${jsonStat.size} bytes)`);
+
+        const screenshotInDir = f.screenshot?.startsWith(`${brokenAuditId}/`);
+        const recordingInDir = f.recording?.startsWith(`${brokenAuditId}/`);
+        filesVerified = Boolean(screenshotInDir && recordingInDir);
       }
     }
 
@@ -123,18 +139,18 @@ async function main(): Promise<void> {
     // Reset TC2 state
     await setTc2State(false);
 
-    const brokenPassed = foundAddToCart && brokenFindings.length === 1;
+    const brokenPassed = foundAddToCart && brokenFindings.length === 1 && filesVerified;
     const fixedPassed = fixedFindings.length === 0;
     const axeClean = axeResult.summary.violationCount === 0;
 
     if (brokenPassed && fixedPassed && axeClean) {
       console.log(
-        "SUCCESS: Broken found #add-to-cart, fixed found none, and axe reported zero violations."
+        "SUCCESS: Broken found #add-to-cart with evidence under /evidence/{auditId}/, fixed found none, and axe reported zero violations."
       );
       process.exit(0);
     } else {
       console.error(
-        `FAILURE: Criteria not met (brokenFound: ${foundAddToCart}, fixedCount: ${fixedFindings.length}, axeClean: ${axeClean})`
+        `FAILURE: Criteria not met (brokenFound: ${foundAddToCart}, filesVerified: ${filesVerified}, fixedCount: ${fixedFindings.length}, axeClean: ${axeClean})`
       );
       process.exit(1);
     }
