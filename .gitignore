@@ -9,3 +9,5 @@ evidence/screenshots/*
 !evidence/recordings/
 evidence/recordings/*
 !evidence/recordings/.gitkeep
+!evidence/test-runs/
+!evidence/test-runs/**

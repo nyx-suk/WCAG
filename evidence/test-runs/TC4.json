@@ -1,0 +1,149 @@
+{
+  "id": "tr_tc4_1792776478313",
+  "test_case": "TC4",
+  "input": {
+    "url": "http://localhost:4000/tc4",
+    "wcagLevel": "AA",
+    "checks": [
+      "keyboard-operability"
+    ],
+    "stages": {
+      "initial": {
+        "state": "broken",
+        "expectedFindings": 1
+      },
+      "retest": {
+        "state": "fixed",
+        "expectedFindings": 0
+      }
+    }
+  },
+  "expected_result": "Initial audit against /tc4 (broken state) must detect custom button #add-to-cart is not keyboard operable and log a pending issue for human review. Following fix deployment, retesting the logged issue on the exact same page using the same check must report zero violations and transition the issue to resolved.",
+  "actual_result": "Initial audit detected 1 finding for WCAG 2.1.1 Keyboard on #add-to-cart: control is inoperable via keyboard. Created pending issue with screenshot evidence. Issue was approved. Following fix deployment, retest completed with 0 violations and transitioned issue status to resolved.",
+  "evidence": {
+    "initialAuditId": "audit_b5462c59-bc26-4302-ae8e-7bad7e9b66e0",
+    "retestAuditId": "audit_0dc9cc26-e485-4f65-ae2e-77fd31a6081d",
+    "issueId": "fnd_b40069b209131867",
+    "fingerprint": "b40069b209131867",
+    "issueStatus": "resolved",
+    "initial": {
+      "auditId": "audit_b5462c59-bc26-4302-ae8e-7bad7e9b66e0",
+      "findingsCount": 1,
+      "screenshot": "audit_b5462c59-bc26-4302-ae8e-7bad7e9b66e0/operability-0.png"
+    },
+    "retest": {
+      "auditId": "audit_0dc9cc26-e485-4f65-ae2e-77fd31a6081d",
+      "findingsCount": 0,
+      "outcome": {
+        "status": "pass",
+        "evidence": {
+          "auditId": "audit_0dc9cc26-e485-4f65-ae2e-77fd31a6081d",
+          "url": "http://localhost:4000/tc4",
+          "status": "complete",
+          "findings": [],
+          "checksPlanned": [
+            "keyboard-operability"
+          ],
+          "checksExecuted": [
+            {
+              "checkId": "keyboard-operability",
+              "status": "executed"
+            }
+          ],
+          "checkDurations": {
+            "keyboard-operability": 285
+          },
+          "plan": {
+            "summary": "Isolated retest plan: executing [keyboard-operability] to verify resolution of reported defect.",
+            "checks": [
+              {
+                "checkId": "keyboard-operability",
+                "reason": "Verify that custom controls, button-styled elements, and clickable targets can be reached and activated via Tab, Enter, and Space."
+              }
+            ]
+          },
+          "steps": [
+            {
+              "step": "collect",
+              "status": "complete",
+              "timestamp": "2026-10-23T17:27:57.851Z",
+              "summary": "Collected target URL http://localhost:4000/tc4 and WCAG level AA.",
+              "details": {
+                "url": "http://localhost:4000/tc4",
+                "wcagLevel": "AA",
+                "auditId": "audit_0dc9cc26-e485-4f65-ae2e-77fd31a6081d"
+              }
+            },
+            {
+              "step": "plan",
+              "status": "complete",
+              "timestamp": "2026-10-23T17:27:58.009Z",
+              "summary": "Isolated retest plan: executing [keyboard-operability] to verify resolution of reported defect.",
+              "details": {
+                "plan": {
+                  "summary": "Isolated retest plan: executing [keyboard-operability] to verify resolution of reported defect.",
+                  "checks": [
+                    {
+                      "checkId": "keyboard-operability",
+                      "reason": "Verify that custom controls, button-styled elements, and clickable targets can be reached and activated via Tab, Enter, and Space."
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "step": "find",
+              "status": "complete",
+              "timestamp": "2026-10-23T17:27:58.310Z",
+              "summary": "Identified 0 finding(s) across 1 executed check(s).",
+              "details": {
+                "findingsCount": 0,
+                "checksExecuted": [
+                  {
+                    "checkId": "keyboard-operability",
+                    "status": "executed"
+                  }
+                ]
+              }
+            },
+            {
+              "step": "act",
+              "status": "complete",
+              "timestamp": "2026-10-23T17:27:58.310Z",
+              "summary": "Audit completed with 0 findings; no issues requiring approval.",
+              "details": {
+                "pendingApprovalCount": 0
+              }
+            }
+          ],
+          "startedAt": "2026-10-23T17:27:57.851Z",
+          "completedAt": "2026-10-23T17:27:58.310Z"
+        }
+      }
+    },
+    "statusHistory": [
+      {
+        "from": null,
+        "to": "pending_approval"
+      },
+      {
+        "from": "pending_approval",
+        "to": "approved_logged"
+      },
+      {
+        "from": "approved_logged",
+        "to": "retesting"
+      },
+      {
+        "from": "retesting",
+        "to": "resolved"
+      }
+    ]
+  },
+  "status": "pass",
+  "explanation": "The fixture page had a real accessibility failure at the initial stage: custom button #add-to-cart was not keyboard operable (WCAG 2.1.1). Fix was applied, and the auditor successfully retested the control with 0 violations and marked the issue resolved.",
+  "started_at": "2026-10-23T17:27:57.254Z",
+  "completed_at": "2026-10-23T17:27:58.313Z",
+  "expected": "Initial audit against /tc4 (broken state) must detect custom button #add-to-cart is not keyboard operable and log a pending issue for human review. Following fix deployment, retesting the logged issue on the exact same page using the same check must report zero violations and transition the issue to resolved.",
+  "actual": "Initial audit detected 1 finding for WCAG 2.1.1 Keyboard on #add-to-cart: control is inoperable via keyboard. Created pending issue with screenshot evidence. Issue was approved. Following fix deployment, retest completed with 0 violations and transitioned issue status to resolved."
+}

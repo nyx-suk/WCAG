@@ -206,6 +206,15 @@ async function main(): Promise<void> {
       completed_at: completedAt,
     });
 
+    // Write explicit axe-summary.json in audit evidence directory
+    if (result.axeSummary) {
+      await fs.writeFile(
+        path.join(process.cwd(), "evidence", auditId, "axe-summary.json"),
+        JSON.stringify(result.axeSummary, null, 2),
+        "utf-8"
+      );
+    }
+
     // Step 5: Print required output lines clearly
     console.log("\n==================================================");
     console.log(`TC2 RESULT: ${status.toUpperCase()}`);
