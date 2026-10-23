@@ -74,16 +74,44 @@ export type AuditFinding = {
 
 export type CheckStatus = "executed" | "failed" | "skipped";
 
+export interface PlannedCheck {
+  checkId: CheckId;
+  reason: string;
+}
+
+export interface AuditPlan {
+  summary: string;
+  checks: PlannedCheck[];
+}
+
+export interface AuditStepLog {
+  step: "collect" | "plan" | "find" | "act";
+  status: "complete" | "in_progress" | "pending" | "failed";
+  timestamp: string;
+  summary: string;
+  details?: Record<string, unknown>;
+}
+
+export interface CheckExecution {
+  checkId: CheckId;
+  status: CheckStatus;
+  error?: string;
+}
+
 export type AuditResult = {
   auditId: string;
   url: string;
   status: "complete" | "incomplete" | "error";
   findings: AuditFinding[];
   checksPlanned: CheckId[];
-  checksExecuted: { checkId: CheckId; status: CheckStatus; error?: string }[];
+  checksExecuted: CheckExecution[];
+  checkDurations?: Partial<Record<CheckId, number>>;
+  plan?: AuditPlan;
+  steps?: AuditStepLog[];
   axeSummary?: { violationCount: number; passesCount: number; incompleteCount: number };
   startedAt: string;
   completedAt: string;
+  error?: string;
 };
 
 export type RunAudit = (input: AuditInput) => Promise<AuditResult>;

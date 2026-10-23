@@ -77,5 +77,24 @@ test("AuditStore: records and retrieves test runs matching PRD schema", async ()
   assert.equal(list.length, 1);
   assert.equal(list[0]?.id, testRun.id);
 
+  const tc4Run = {
+    id: "tr_tc4_lifecycle",
+    test_case: "TC4" as const,
+    input: { url: "http://localhost:4000/tc4", wcagLevel: "AA" as const },
+    expected_result: "Initial failure detected and resolved upon retest",
+    actual_result: "Issue resolved",
+    evidence: { issueStatus: "resolved" },
+    status: "pass" as const,
+    explanation: "Initial page had real failure; retest resolved after fix.",
+    started_at: "2026-10-23T01:00:00.000Z",
+    completed_at: "2026-10-23T01:00:10.000Z",
+  };
+  store.recordTestRun(tc4Run);
+  const fetchedTc4 = store.getTestRun("TC4");
+  assert.ok(fetchedTc4);
+  assert.equal(fetchedTc4.id, tc4Run.id);
+  assert.equal(fetchedTc4.status, "pass");
+  assert.equal(store.listTestRuns().length, 2);
+
   store.close();
 });

@@ -271,17 +271,9 @@ export async function recordOfficialTestRun(
   // 3. Write individual test case report
   const testRunsDir = path.resolve(EVIDENCE_DIR, "test-runs");
   await fs.mkdir(testRunsDir, { recursive: true });
-  const filename =
-    record.test_case === "TC4"
-      ? (record.id.includes("initial") || (record.input as any)?.state === "broken" || record.status === "fail"
-          ? "TC4-initial.json"
-          : "TC4-retest.json")
-      : `${record.test_case}.json`;
+  const filename = `${record.test_case}.json`;
   const targetFile = path.join(testRunsDir, filename);
   await fs.writeFile(targetFile, JSON.stringify(serialized, null, 2), "utf-8");
-  if (record.test_case === "TC4") {
-    await fs.writeFile(path.join(testRunsDir, "TC4.json"), JSON.stringify(serialized, null, 2), "utf-8");
-  }
 
   // 4. Write per-audit official-report.json if auditId is provided
   const targetAuditId = auditId ?? (record.evidence as any)?.auditId ?? (record.input as any)?.auditId;
@@ -290,22 +282,6 @@ export async function recordOfficialTestRun(
     await fs.mkdir(auditDir, { recursive: true });
     await fs.writeFile(path.join(auditDir, "official-report.json"), JSON.stringify(serialized, null, 2), "utf-8");
   }
-
-  // Helper to distinguish distinct runs per test case (e.g. TC4 initial vs retest)
-  const getRecordKey = (item: any): string => {
-    if (item?.test_case === "TC4") {
-      const id = String(item?.id ?? "");
-      const state = (item?.input as any)?.state;
-      if (id.includes("initial") || state === "broken" || item?.status === "fail") {
-        return "TC4:initial";
-      }
-      if (id.includes("retest") || state === "fixed") {
-        return "TC4:retest";
-      }
-      return `TC4:${id}`;
-    }
-    return item?.test_case ?? String(item?.id ?? "unknown");
-  };
 
   // 5. Upsert into aggregated test-runs.json in root and evidence/
   const recordsMap = new Map<string, any>();
@@ -321,7 +297,7 @@ export async function recordOfficialTestRun(
       if (Array.isArray(list)) {
         for (const item of list) {
           if (item?.test_case) {
-            recordsMap.set(getRecordKey(item), item);
+            recordsMap.set(item.test_case, item);
           }
         }
       }
@@ -334,12 +310,12 @@ export async function recordOfficialTestRun(
   try {
     const files = await fs.readdir(testRunsDir);
     for (const f of files) {
-      if (f.endsWith(".json")) {
+      if (f.endsWith(".json") && !f.includes("-initial") && !f.includes("-retest")) {
         try {
           const content = await fs.readFile(path.join(testRunsDir, f), "utf-8");
           const item = JSON.parse(content);
           if (item?.test_case) {
-            recordsMap.set(getRecordKey(item), item);
+            recordsMap.set(item.test_case, item);
           }
         } catch {
           // ignore
@@ -350,12 +326,14 @@ export async function recordOfficialTestRun(
     // ignore
   }
 
-  recordsMap.set(getRecordKey(serialized), serialized);
+  // Clean up any old sub-keys if present
+  recordsMap.delete("TC4:initial");
+  recordsMap.delete("TC4:retest");
+
+  recordsMap.set(record.test_case, serialized);
 
   const combined = Array.from(recordsMap.values()).sort((a, b) => {
-    const tcDiff = a.test_case.localeCompare(b.test_case);
-    if (tcDiff !== 0) return tcDiff;
-    return (a.started_at ?? "").localeCompare(b.started_at ?? "");
+    return a.test_case.localeCompare(b.test_case);
   });
 
   await fs.writeFile(path.resolve(EVIDENCE_DIR, "..", "test-runs.json"), JSON.stringify(combined, null, 2), "utf-8");
