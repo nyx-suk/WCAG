@@ -129,7 +129,12 @@ export async function finalizeVideo(
     } catch {
       // Safe to proceed if target file does not yet exist
     }
-    await fs.rename(tempPath, targetPath);
+    try {
+      await fs.rename(tempPath, targetPath);
+    } catch {
+      await fs.copyFile(tempPath, targetPath);
+      await fs.unlink(tempPath).catch(() => {});
+    }
   }
 
   return path.join(auditId, targetFilename);

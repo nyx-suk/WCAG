@@ -11,6 +11,7 @@
     "tc3": "tsx scripts/verify-tc3-contrast.ts",
     "tc4": "tsx scripts/verify-tc4-retest.ts",
     "e2e": "tsx scripts/verify-e2e-tc2-retest.ts",
+    "repeat": "tsx scripts/repeat.ts",
     "verify:tc2": "tsx scripts/verify-tc2-axe-clean.ts",
     "verify:tc3": "tsx scripts/verify-tc3-contrast.ts",
     "verify:tc4": "tsx scripts/verify-tc4-retest.ts",
