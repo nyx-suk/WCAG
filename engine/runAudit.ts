@@ -388,6 +388,7 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
             error: "contrast module not available",
           });
           status = "incomplete";
+          console.log(`[audit:${input.auditId}] check=${checkId} status=skipped duration=${checkDurations[checkId]}ms`);
           continue;
         }
 
@@ -405,6 +406,7 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
             error: "contrast module not available",
           });
           status = "incomplete";
+          console.log(`[audit:${input.auditId}] check=${checkId} status=skipped duration=${checkDurations[checkId]}ms`);
           continue;
         }
 
@@ -485,6 +487,10 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
         });
         status = "incomplete";
       }
+
+      const execution = checksExecuted[checksExecuted.length - 1];
+      const durationMs = (checkDurations as Record<string, number>)[checkId] ?? 0;
+      console.log(`[audit:${input.auditId}] check=${checkId} status=${execution?.status ?? "unknown"} duration=${durationMs}ms`);
     }
   } finally {
     try {
