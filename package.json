@@ -8,9 +8,13 @@
     "start": "tsx src/server.ts",
     "tc1": "tsx scripts/run-tc1.ts",
     "tc2": "tsx scripts/run-tc2.ts",
+    "tc3": "tsx scripts/verify-tc3-contrast.ts",
+    "tc4": "tsx scripts/verify-tc4-retest.ts",
+    "e2e": "tsx scripts/verify-e2e-tc2-retest.ts",
     "verify:tc2": "tsx scripts/verify-tc2-axe-clean.ts",
     "verify:tc3": "tsx scripts/verify-tc3-contrast.ts",
     "verify:tc4": "tsx scripts/verify-tc4-retest.ts",
+    "verify:e2e": "tsx scripts/verify-e2e-tc2-retest.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test test/**/*.test.ts"

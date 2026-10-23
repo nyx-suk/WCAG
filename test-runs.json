@@ -1,6 +1,6 @@
 [
   {
-    "id": "tr_tc1_1792732354483",
+    "id": "tr_tc1_1792743529868",
     "test_case": "TC1",
     "input": {
       "badUrl": "http://localhost:4000/tc1/bad",
@@ -12,18 +12,18 @@
     },
     "expected_result": "A page containing an open modal dialog creates a genuine keyboard trap. The auditor must detect the trap, prove that keyboard focus cannot exit the modal via Tab/Shift+Tab, confirm that the Escape key fails to dismiss the modal, capture an interaction recording (.webm), and verify that an accessible modal (control) passes with zero findings.",
     "expected": "A page containing an open modal dialog creates a genuine keyboard trap. The auditor must detect the trap, prove that keyboard focus cannot exit the modal via Tab/Shift+Tab, confirm that the Escape key fails to dismiss the modal, capture an interaction recording (.webm), and verify that an accessible modal (control) passes with zero findings.",
-    "actual_result": "Auditor successfully identified a genuine keyboard trap on /tc1/bad (#newsletter-modal), logging 1 critical finding for WCAG 2.1.2 No Keyboard Trap. Focus movement was tracked across 9 tab steps, detecting a loop of 3 elements (cycleDetected=true). Escape key was pressed but the modal remained open (modalStillOpenAfterEscape=true). Dismiss controls (#maybe-later-btn, #subscribe-btn) were activated via keyboard but failed to dismiss the dialog (dismissControlsWorked=false). Non-empty screenshot and .webm interaction recording were captured under /evidence/tc1-1792732354483/. The control page /tc1/good produced 0 findings with full keyboard exit support.",
-    "actual": "Auditor successfully identified a genuine keyboard trap on /tc1/bad (#newsletter-modal), logging 1 critical finding for WCAG 2.1.2 No Keyboard Trap. Focus movement was tracked across 9 tab steps, detecting a loop of 3 elements (cycleDetected=true). Escape key was pressed but the modal remained open (modalStillOpenAfterEscape=true). Dismiss controls (#maybe-later-btn, #subscribe-btn) were activated via keyboard but failed to dismiss the dialog (dismissControlsWorked=false). Non-empty screenshot and .webm interaction recording were captured under /evidence/tc1-1792732354483/. The control page /tc1/good produced 0 findings with full keyboard exit support.",
+    "actual_result": "Auditor successfully identified a genuine keyboard trap on /tc1/bad (#newsletter-modal), logging 1 critical finding for WCAG 2.1.2 No Keyboard Trap. Focus movement was tracked across 9 tab steps, detecting a loop of 3 elements (cycleDetected=true). Escape key was pressed but the modal remained open (modalStillOpenAfterEscape=true). Dismiss controls (#maybe-later-btn, #subscribe-btn) were activated via keyboard but failed to dismiss the dialog (dismissControlsWorked=false). Non-empty screenshot and .webm interaction recording were captured under /evidence/tc1-1792743529868/. The control page /tc1/good produced 0 findings with full keyboard exit support.",
+    "actual": "Auditor successfully identified a genuine keyboard trap on /tc1/bad (#newsletter-modal), logging 1 critical finding for WCAG 2.1.2 No Keyboard Trap. Focus movement was tracked across 9 tab steps, detecting a loop of 3 elements (cycleDetected=true). Escape key was pressed but the modal remained open (modalStillOpenAfterEscape=true). Dismiss controls (#maybe-later-btn, #subscribe-btn) were activated via keyboard but failed to dismiss the dialog (dismissControlsWorked=false). Non-empty screenshot and .webm interaction recording were captured under /evidence/tc1-1792743529868/. The control page /tc1/good produced 0 findings with full keyboard exit support.",
     "evidence": {
-      "badAuditId": "tc1-1792732354483",
-      "goodAuditId": "tc1-control-1792732354483",
+      "badAuditId": "tc1-1792743529868",
+      "goodAuditId": "tc1-control-1792743529868",
       "finding": {
         "title": "Keyboard trap in modal dialog",
         "wcagRule": "2.1.2 No Keyboard Trap",
         "severity": "critical",
         "selector": "#newsletter-modal",
-        "screenshot": "tc1-1792732354483/keyboard-trap.png",
-        "recording": "tc1-1792732354483/keyboard-trap.webm",
+        "screenshot": "tc1-1792743529868/keyboard-trap.png",
+        "recording": "tc1-1792743529868/keyboard-trap.webm",
         "evidence": {
           "opener": "#open-newsletter-btn",
           "tabSequence": [
@@ -55,11 +55,11 @@
     },
     "status": "pass",
     "explanation": null,
-    "started_at": "2026-10-23T05:12:34.482Z",
-    "completed_at": "2026-10-23T05:12:35.971Z"
+    "started_at": "2026-10-23T08:18:49.868Z",
+    "completed_at": "2026-10-23T08:18:51.356Z"
   },
   {
-    "id": "tr_tc2_1792732356687",
+    "id": "tr_tc2_1792743532063",
     "test_case": "TC2",
     "input": {
       "url": "http://localhost:4000/tc2",
@@ -71,10 +71,10 @@
     },
     "expected_result": "axe-core automated scanning against /tc2 must report zero violations, while manual keyboard interaction testing identifies custom control #add-to-cart as inoperable via keyboard (unreachable by Tab, Enter/Space inactive, despite mouse click handler present).",
     "expected": "axe-core automated scanning against /tc2 must report zero violations, while manual keyboard interaction testing identifies custom control #add-to-cart as inoperable via keyboard (unreachable by Tab, Enter/Space inactive, despite mouse click handler present).",
-    "actual_result": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792732356687/.",
-    "actual": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792732356687/.",
+    "actual_result": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792743532063/.",
+    "actual": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792743532063/.",
     "evidence": {
-      "auditId": "tc2-1792732356687",
+      "auditId": "tc2-1792743532063",
       "axeSummary": {
         "violationCount": 0,
         "passesCount": 15,
@@ -85,8 +85,8 @@
         "wcagRule": "2.1.1 Keyboard",
         "severity": "serious",
         "selector": "#add-to-cart",
-        "screenshot": "tc2-1792732356687/operability-0.png",
-        "recording": "tc2-1792732356687/keyboard-operability.webm",
+        "screenshot": "tc2-1792743532063/operability-0.png",
+        "recording": "tc2-1792743532063/keyboard-operability.webm",
         "evidence": {
           "selector": "#add-to-cart",
           "html": "<div id=\"add-to-cart\" class=\"btn btn-primary\">Add to cart</div>",
@@ -101,11 +101,11 @@
     },
     "status": "pass",
     "explanation": null,
-    "started_at": "2026-10-23T05:12:36.687Z",
-    "completed_at": "2026-10-23T05:12:37.694Z"
+    "started_at": "2026-10-23T08:18:52.063Z",
+    "completed_at": "2026-10-23T08:18:53.073Z"
   },
   {
-    "id": "tr_tc3_1792742475595",
+    "id": "tr_tc3_1792743534284",
     "test_case": "TC3",
     "input": {
       "url": "http://localhost:4000/tc3",
@@ -117,18 +117,18 @@
     "expected_result": "Grey text (#hero-caption) displayed over a photo background must be evaluated by sampling screenshot pixels. The measured contrast ratio must fall below the WCAG AA 4.5:1 threshold (~1.69:1) and log 1 contrast finding with pixel coordinates and screenshot evidence.",
     "actual_result": "Measured contrast ratio 1.693164014892572:1 against 4.5:1 threshold on #hero-caption using screenshot background pixel sampling. Produced 1 finding for WCAG 1.4.3 Contrast (Minimum) with screenshot and annotated screenshot evidence.",
     "evidence": {
-      "auditId": "official-tc3-1792742475096",
+      "auditId": "official-tc3-1792743533783",
       "finding": {
         "title": "Insufficient text contrast",
         "wcagRule": "1.4.3 Contrast (Minimum)",
         "severity": "serious",
         "selector": "#hero-caption",
-        "screenshot": "official-tc3-1792742475096/contrast.png",
-        "annotatedScreenshot": "official-tc3-1792742475096/contrast-annotated.png",
+        "screenshot": "official-tc3-1792743533783/contrast.png",
+        "annotatedScreenshot": "official-tc3-1792743533783/contrast-annotated.png",
         "evidence": {
           "screenshot": {
             "kind": "path",
-            "path": "/Users/sukruthasrigadde/stuff/WCAG/evidence/official-tc3-1792742475096/contrast.png",
+            "path": "/Users/sukruthasrigadde/stuff/WCAG/evidence/official-tc3-1792743533783/contrast.png",
             "mimeType": "image/png"
           },
           "text": "Find your quiet place.",
@@ -306,8 +306,8 @@
           "measuredRatio": 1.693164014892572
         }
       },
-      "screenshot": "official-tc3-1792742475096/contrast.png",
-      "annotatedScreenshot": "official-tc3-1792742475096/contrast-annotated.png",
+      "screenshot": "official-tc3-1792743533783/contrast.png",
+      "annotatedScreenshot": "official-tc3-1792743533783/contrast-annotated.png",
       "sampledCoordinates": [
         {
           "x": 231,
@@ -475,13 +475,13 @@
     },
     "status": "pass",
     "explanation": null,
-    "started_at": "2026-10-23T08:01:15.114Z",
-    "completed_at": "2026-10-23T08:01:15.595Z",
+    "started_at": "2026-10-23T08:18:53.804Z",
+    "completed_at": "2026-10-23T08:18:54.284Z",
     "expected": "Grey text (#hero-caption) displayed over a photo background must be evaluated by sampling screenshot pixels. The measured contrast ratio must fall below the WCAG AA 4.5:1 threshold (~1.69:1) and log 1 contrast finding with pixel coordinates and screenshot evidence.",
     "actual": "Measured contrast ratio 1.693164014892572:1 against 4.5:1 threshold on #hero-caption using screenshot background pixel sampling. Produced 1 finding for WCAG 1.4.3 Contrast (Minimum) with screenshot and annotated screenshot evidence."
   },
   {
-    "id": "tr_tc4_initial_1792742476951",
+    "id": "tr_tc4_initial_1792743535646",
     "test_case": "TC4",
     "input": {
       "url": "http://localhost:4000/tc4",
@@ -494,26 +494,26 @@
     "expected_result": "Initial audit against /tc4 (broken state) must detect custom button #add-to-cart is not keyboard operable, logging 1 finding for WCAG 2.1.1 Keyboard with screenshot and recording evidence.",
     "actual_result": "Initial audit detected 1 finding for WCAG 2.1.1 Keyboard on #add-to-cart: control is not reachable or operable via keyboard. Created pending issue with screenshot evidence.",
     "evidence": {
-      "auditId": "audit_c09942cb-831a-44c9-897a-e0fe5f465668",
+      "auditId": "audit_1a980ec1-2fa0-4f30-9c17-52c9e5667557",
       "issue": {
         "id": "fnd_b40069b209131867",
         "fingerprint": "b40069b209131867",
         "status": "pending_approval",
-        "screenshot": "audit_c09942cb-831a-44c9-897a-e0fe5f465668/operability-0.png",
-        "recording": "audit_c09942cb-831a-44c9-897a-e0fe5f465668/keyboard-operability.webm"
+        "screenshot": "audit_1a980ec1-2fa0-4f30-9c17-52c9e5667557/operability-0.png",
+        "recording": "audit_1a980ec1-2fa0-4f30-9c17-52c9e5667557/keyboard-operability.webm"
       },
       "findingsCount": 1,
-      "screenshot": "audit_c09942cb-831a-44c9-897a-e0fe5f465668/operability-0.png"
+      "screenshot": "audit_1a980ec1-2fa0-4f30-9c17-52c9e5667557/operability-0.png"
     },
     "status": "fail",
     "explanation": "Page /tc4 failed keyboard operability check: custom button #add-to-cart is not keyboard operable.",
-    "started_at": "2026-10-23T08:01:16.393Z",
-    "completed_at": "2026-10-23T08:01:16.951Z",
+    "started_at": "2026-10-23T08:18:55.085Z",
+    "completed_at": "2026-10-23T08:18:55.646Z",
     "expected": "Initial audit against /tc4 (broken state) must detect custom button #add-to-cart is not keyboard operable, logging 1 finding for WCAG 2.1.1 Keyboard with screenshot and recording evidence.",
     "actual": "Initial audit detected 1 finding for WCAG 2.1.1 Keyboard on #add-to-cart: control is not reachable or operable via keyboard. Created pending issue with screenshot evidence."
   },
   {
-    "id": "tr_tc4_retest_1792742477387",
+    "id": "tr_tc4_retest_1792743536084",
     "test_case": "TC4",
     "input": {
       "url": "http://localhost:4000/tc4",
@@ -526,15 +526,15 @@
     "expected_result": "Following fix deployment, retesting the logged issue on the exact same page using the same check must report zero violations and transition the issue to resolved.",
     "actual_result": "Retest completed with 0 violations. Issue status transitioned to resolved with retest evidence preserved.",
     "evidence": {
-      "auditId": "audit_2c52b4b9-b966-4e4e-a857-be04c95ed2c5",
-      "initialAuditId": "audit_c09942cb-831a-44c9-897a-e0fe5f465668",
+      "auditId": "audit_8980585e-8302-4c57-a8f8-4931b8a902bb",
+      "initialAuditId": "audit_1a980ec1-2fa0-4f30-9c17-52c9e5667557",
       "issueId": "fnd_b40069b209131867",
       "fingerprint": "b40069b209131867",
       "issueStatus": "resolved",
       "outcome": {
         "status": "pass",
         "evidence": {
-          "auditId": "audit_2c52b4b9-b966-4e4e-a857-be04c95ed2c5",
+          "auditId": "audit_8980585e-8302-4c57-a8f8-4931b8a902bb",
           "url": "http://localhost:4000/tc4",
           "status": "complete",
           "findings": [],
@@ -547,17 +547,17 @@
               "status": "executed"
             }
           ],
-          "startedAt": "2026-10-23T08:01:16.966Z",
-          "completedAt": "2026-10-23T08:01:17.386Z"
+          "startedAt": "2026-10-23T08:18:55.661Z",
+          "completedAt": "2026-10-23T08:18:56.082Z"
         }
       },
       "findingsCount": 0,
-      "initialEvidence": "audit_c09942cb-831a-44c9-897a-e0fe5f465668/operability-0.png"
+      "initialEvidence": "audit_1a980ec1-2fa0-4f30-9c17-52c9e5667557/operability-0.png"
     },
     "status": "pass",
     "explanation": null,
-    "started_at": "2026-10-23T08:01:16.966Z",
-    "completed_at": "2026-10-23T08:01:17.387Z",
+    "started_at": "2026-10-23T08:18:55.660Z",
+    "completed_at": "2026-10-23T08:18:56.084Z",
     "expected": "Following fix deployment, retesting the logged issue on the exact same page using the same check must report zero violations and transition the issue to resolved.",
     "actual": "Retest completed with 0 violations. Issue status transitioned to resolved with retest evidence preserved."
   }
