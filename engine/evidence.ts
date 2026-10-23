@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Page, BrowserContext, Locator } from "playwright";
-import type { AuditFinding, CheckId } from "./types";
+import type { AuditFinding, CheckId, TestRunRecord } from "./types";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -228,3 +228,139 @@ export function describeFinding(finding: AuditFinding): string {
     `Evidence: Open ${evidenceRef} to view the captured evidence.`,
   ].join("\n");
 }
+
+export interface RecordOfficialTestRunOptions {
+  record: TestRunRecord & { expected?: string; actual?: string };
+  auditId?: string;
+  store?: { recordTestRun: (record: TestRunRecord) => void };
+}
+
+/**
+ * Shared synchronization helper across all official test runners (TC1–TC4):
+ * 1. Persists record to SQLite test_runs table if store is provided.
+ * 2. Writes individual test case report to /evidence/test-runs/<test_case>.json.
+ * 3. Writes per-audit report to /evidence/<auditId>/official-report.json if auditId is provided.
+ * 4. Upserts into aggregated test-runs.json in repo root and /evidence/test-runs.json.
+ */
+export async function recordOfficialTestRun(
+  optionsOrRecord: RecordOfficialTestRunOptions | (TestRunRecord & { expected?: string; actual?: string }),
+  maybeStore?: { recordTestRun: (record: TestRunRecord) => void },
+  maybeAuditId?: string
+): Promise<string> {
+  const isOptions = (arg: any): arg is RecordOfficialTestRunOptions =>
+    typeof arg === "object" && arg !== null && "record" in arg;
+
+  const record: TestRunRecord & { expected?: string; actual?: string } = isOptions(optionsOrRecord)
+    ? optionsOrRecord.record
+    : optionsOrRecord;
+  const store = isOptions(optionsOrRecord) ? optionsOrRecord.store : maybeStore;
+  const auditId = isOptions(optionsOrRecord) ? optionsOrRecord.auditId : maybeAuditId;
+
+  // 1. Persist to SQLite if store is provided
+  if (store && typeof store.recordTestRun === "function") {
+    store.recordTestRun(record);
+  }
+
+  // 2. Prepare serialized object with both expected/expected_result and actual/actual_result
+  const serialized = {
+    ...record,
+    expected: record.expected ?? record.expected_result,
+    actual: record.actual ?? record.actual_result,
+  };
+
+  // 3. Write individual test case report
+  const testRunsDir = path.resolve(EVIDENCE_DIR, "test-runs");
+  await fs.mkdir(testRunsDir, { recursive: true });
+  const filename =
+    record.test_case === "TC4"
+      ? (record.id.includes("initial") || (record.input as any)?.state === "broken" || record.status === "fail"
+          ? "TC4-initial.json"
+          : "TC4-retest.json")
+      : `${record.test_case}.json`;
+  const targetFile = path.join(testRunsDir, filename);
+  await fs.writeFile(targetFile, JSON.stringify(serialized, null, 2), "utf-8");
+  if (record.test_case === "TC4") {
+    await fs.writeFile(path.join(testRunsDir, "TC4.json"), JSON.stringify(serialized, null, 2), "utf-8");
+  }
+
+  // 4. Write per-audit official-report.json if auditId is provided
+  const targetAuditId = auditId ?? (record.evidence as any)?.auditId ?? (record.input as any)?.auditId;
+  if (targetAuditId) {
+    const auditDir = path.resolve(EVIDENCE_DIR, targetAuditId);
+    await fs.mkdir(auditDir, { recursive: true });
+    await fs.writeFile(path.join(auditDir, "official-report.json"), JSON.stringify(serialized, null, 2), "utf-8");
+  }
+
+  // Helper to distinguish distinct runs per test case (e.g. TC4 initial vs retest)
+  const getRecordKey = (item: any): string => {
+    if (item?.test_case === "TC4") {
+      const id = String(item?.id ?? "");
+      const state = (item?.input as any)?.state;
+      if (id.includes("initial") || state === "broken" || item?.status === "fail") {
+        return "TC4:initial";
+      }
+      if (id.includes("retest") || state === "fixed") {
+        return "TC4:retest";
+      }
+      return `TC4:${id}`;
+    }
+    return item?.test_case ?? String(item?.id ?? "unknown");
+  };
+
+  // 5. Upsert into aggregated test-runs.json in root and evidence/
+  const recordsMap = new Map<string, any>();
+  const locations = [
+    path.resolve(EVIDENCE_DIR, "..", "test-runs.json"),
+    path.resolve(EVIDENCE_DIR, "test-runs.json"),
+  ];
+
+  for (const loc of locations) {
+    try {
+      const content = await fs.readFile(loc, "utf-8");
+      const list = JSON.parse(content);
+      if (Array.isArray(list)) {
+        for (const item of list) {
+          if (item?.test_case) {
+            recordsMap.set(getRecordKey(item), item);
+          }
+        }
+      }
+    } catch {
+      // ignore if file doesn't exist yet
+    }
+  }
+
+  // Also read any existing individual files in /evidence/test-runs/*.json
+  try {
+    const files = await fs.readdir(testRunsDir);
+    for (const f of files) {
+      if (f.endsWith(".json")) {
+        try {
+          const content = await fs.readFile(path.join(testRunsDir, f), "utf-8");
+          const item = JSON.parse(content);
+          if (item?.test_case) {
+            recordsMap.set(getRecordKey(item), item);
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  recordsMap.set(getRecordKey(serialized), serialized);
+
+  const combined = Array.from(recordsMap.values()).sort((a, b) => {
+    const tcDiff = a.test_case.localeCompare(b.test_case);
+    if (tcDiff !== 0) return tcDiff;
+    return (a.started_at ?? "").localeCompare(b.started_at ?? "");
+  });
+
+  await fs.writeFile(path.resolve(EVIDENCE_DIR, "..", "test-runs.json"), JSON.stringify(combined, null, 2), "utf-8");
+  await fs.writeFile(path.resolve(EVIDENCE_DIR, "test-runs.json"), JSON.stringify(combined, null, 2), "utf-8");
+
+  return targetFile;
+}
+

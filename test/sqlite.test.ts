@@ -45,3 +45,37 @@ test("rejects resolving an issue without a passing retest", async () => {
   assert.throws(() => store.updateIssueStatus("missing", "resolved"), /was not found/);
   store.close();
 });
+
+test("AuditStore: records and retrieves test runs matching PRD schema", async () => {
+  const store = await AuditStore.open(":memory:");
+  const testRun = {
+    id: "tr_tc1_123456",
+    test_case: "TC1" as const,
+    input: { url: "http://localhost:4000/tc1/bad", wcagLevel: "AA" as const },
+    expected_result: "Modal trap detected",
+    actual_result: "1 critical finding",
+    evidence: { recording: "tc1/keyboard-trap.webm" },
+    status: "pass" as const,
+    explanation: null,
+    started_at: "2026-10-23T00:00:00.000Z",
+    completed_at: "2026-10-23T00:00:05.000Z",
+  };
+
+  store.recordTestRun(testRun);
+  const fetched = store.getTestRun("tr_tc1_123456");
+  assert.ok(fetched);
+  assert.equal(fetched.id, testRun.id);
+  assert.equal(fetched.test_case, "TC1");
+  assert.equal(fetched.status, "pass");
+  assert.deepEqual(fetched.input, testRun.input);
+
+  const byCase = store.getTestRun("TC1");
+  assert.ok(byCase);
+  assert.equal(byCase.id, testRun.id);
+
+  const list = store.listTestRuns();
+  assert.equal(list.length, 1);
+  assert.equal(list[0]?.id, testRun.id);
+
+  store.close();
+});

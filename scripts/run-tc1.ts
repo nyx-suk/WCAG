@@ -187,6 +187,7 @@ async function main(): Promise<void> {
     const recordFile = await writeTestRun({
       id: `tr_tc1_${timestamp}`,
       test_case: "TC1",
+      auditId: badAuditId,
       input: {
         badUrl: `${baseUrl}/tc1/bad`,
         goodUrl: `${baseUrl}/tc1/good`,

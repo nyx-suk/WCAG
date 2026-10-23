@@ -1,0 +1,564 @@
+[
+  {
+    "id": "tr_tc1_1792732354483",
+    "test_case": "TC1",
+    "input": {
+      "badUrl": "http://localhost:4000/tc1/bad",
+      "goodUrl": "http://localhost:4000/tc1/good",
+      "wcagLevel": "AA",
+      "checks": [
+        "keyboard-trap"
+      ]
+    },
+    "expected_result": "A page containing an open modal dialog creates a genuine keyboard trap. The auditor must detect the trap, prove that keyboard focus cannot exit the modal via Tab/Shift+Tab, confirm that the Escape key fails to dismiss the modal, capture an interaction recording (.webm), and verify that an accessible modal (control) passes with zero findings.",
+    "expected": "A page containing an open modal dialog creates a genuine keyboard trap. The auditor must detect the trap, prove that keyboard focus cannot exit the modal via Tab/Shift+Tab, confirm that the Escape key fails to dismiss the modal, capture an interaction recording (.webm), and verify that an accessible modal (control) passes with zero findings.",
+    "actual_result": "Auditor successfully identified a genuine keyboard trap on /tc1/bad (#newsletter-modal), logging 1 critical finding for WCAG 2.1.2 No Keyboard Trap. Focus movement was tracked across 9 tab steps, detecting a loop of 3 elements (cycleDetected=true). Escape key was pressed but the modal remained open (modalStillOpenAfterEscape=true). Dismiss controls (#maybe-later-btn, #subscribe-btn) were activated via keyboard but failed to dismiss the dialog (dismissControlsWorked=false). Non-empty screenshot and .webm interaction recording were captured under /evidence/tc1-1792732354483/. The control page /tc1/good produced 0 findings with full keyboard exit support.",
+    "actual": "Auditor successfully identified a genuine keyboard trap on /tc1/bad (#newsletter-modal), logging 1 critical finding for WCAG 2.1.2 No Keyboard Trap. Focus movement was tracked across 9 tab steps, detecting a loop of 3 elements (cycleDetected=true). Escape key was pressed but the modal remained open (modalStillOpenAfterEscape=true). Dismiss controls (#maybe-later-btn, #subscribe-btn) were activated via keyboard but failed to dismiss the dialog (dismissControlsWorked=false). Non-empty screenshot and .webm interaction recording were captured under /evidence/tc1-1792732354483/. The control page /tc1/good produced 0 findings with full keyboard exit support.",
+    "evidence": {
+      "badAuditId": "tc1-1792732354483",
+      "goodAuditId": "tc1-control-1792732354483",
+      "finding": {
+        "title": "Keyboard trap in modal dialog",
+        "wcagRule": "2.1.2 No Keyboard Trap",
+        "severity": "critical",
+        "selector": "#newsletter-modal",
+        "screenshot": "tc1-1792732354483/keyboard-trap.png",
+        "recording": "tc1-1792732354483/keyboard-trap.webm",
+        "evidence": {
+          "opener": "#open-newsletter-btn",
+          "tabSequence": [
+            "button#maybe-later-btn \"Maybe later\"",
+            "button#subscribe-btn \"Subscribe\"",
+            "input#newsletter-email \"email\"",
+            "button#maybe-later-btn \"Maybe later\"",
+            "button#subscribe-btn \"Subscribe\"",
+            "input#newsletter-email \"email\"",
+            "Shift+Tab -> button#subscribe-btn \"Subscribe\"",
+            "Shift+Tab -> button#maybe-later-btn \"Maybe later\"",
+            "Shift+Tab -> input#newsletter-email \"email\""
+          ],
+          "cycleDetected": true,
+          "cycleLength": 3,
+          "escapePressed": true,
+          "modalStillOpenAfterEscape": true,
+          "dismissControlsFound": [
+            "#maybe-later-btn",
+            "#subscribe-btn"
+          ],
+          "dismissControlsWorked": false
+        }
+      },
+      "goodResult": {
+        "status": "complete",
+        "findingsCount": 0
+      }
+    },
+    "status": "pass",
+    "explanation": null,
+    "started_at": "2026-10-23T05:12:34.482Z",
+    "completed_at": "2026-10-23T05:12:35.971Z"
+  },
+  {
+    "id": "tr_tc2_1792732356687",
+    "test_case": "TC2",
+    "input": {
+      "url": "http://localhost:4000/tc2",
+      "wcagLevel": "AA",
+      "checks": [
+        "axe",
+        "keyboard-operability"
+      ]
+    },
+    "expected_result": "axe-core automated scanning against /tc2 must report zero violations, while manual keyboard interaction testing identifies custom control #add-to-cart as inoperable via keyboard (unreachable by Tab, Enter/Space inactive, despite mouse click handler present).",
+    "expected": "axe-core automated scanning against /tc2 must report zero violations, while manual keyboard interaction testing identifies custom control #add-to-cart as inoperable via keyboard (unreachable by Tab, Enter/Space inactive, despite mouse click handler present).",
+    "actual_result": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792732356687/.",
+    "actual": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792732356687/.",
+    "evidence": {
+      "auditId": "tc2-1792732356687",
+      "axeSummary": {
+        "violationCount": 0,
+        "passesCount": 15,
+        "incompleteCount": 0
+      },
+      "finding": {
+        "title": "Custom control is not keyboard operable",
+        "wcagRule": "2.1.1 Keyboard",
+        "severity": "serious",
+        "selector": "#add-to-cart",
+        "screenshot": "tc2-1792732356687/operability-0.png",
+        "recording": "tc2-1792732356687/keyboard-operability.webm",
+        "evidence": {
+          "selector": "#add-to-cart",
+          "html": "<div id=\"add-to-cart\" class=\"btn btn-primary\">Add to cart</div>",
+          "cursorPointer": true,
+          "hasClickHandler": true,
+          "reachableByTab": false,
+          "tabsPressed": 6,
+          "enterActivated": false,
+          "spaceActivated": false
+        }
+      }
+    },
+    "status": "pass",
+    "explanation": null,
+    "started_at": "2026-10-23T05:12:36.687Z",
+    "completed_at": "2026-10-23T05:12:37.694Z"
+  },
+  {
+    "id": "tr_tc3_1792742475595",
+    "test_case": "TC3",
+    "input": {
+      "url": "http://localhost:4000/tc3",
+      "wcagLevel": "AA",
+      "checks": [
+        "contrast"
+      ]
+    },
+    "expected_result": "Grey text (#hero-caption) displayed over a photo background must be evaluated by sampling screenshot pixels. The measured contrast ratio must fall below the WCAG AA 4.5:1 threshold (~1.69:1) and log 1 contrast finding with pixel coordinates and screenshot evidence.",
+    "actual_result": "Measured contrast ratio 1.693164014892572:1 against 4.5:1 threshold on #hero-caption using screenshot background pixel sampling. Produced 1 finding for WCAG 1.4.3 Contrast (Minimum) with screenshot and annotated screenshot evidence.",
+    "evidence": {
+      "auditId": "official-tc3-1792742475096",
+      "finding": {
+        "title": "Insufficient text contrast",
+        "wcagRule": "1.4.3 Contrast (Minimum)",
+        "severity": "serious",
+        "selector": "#hero-caption",
+        "screenshot": "official-tc3-1792742475096/contrast.png",
+        "annotatedScreenshot": "official-tc3-1792742475096/contrast-annotated.png",
+        "evidence": {
+          "screenshot": {
+            "kind": "path",
+            "path": "/Users/sukruthasrigadde/stuff/WCAG/evidence/official-tc3-1792742475096/contrast.png",
+            "mimeType": "image/png"
+          },
+          "text": "Find your quiet place.",
+          "boundingBox": {
+            "x": 232,
+            "y": 392,
+            "width": 305.953125,
+            "height": 40
+          },
+          "requiredRatio": 4.5,
+          "wcagCriterion": "1.4.3",
+          "samples": [
+            {
+              "x": 231,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 232,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 233,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 234,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 235,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 236,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 237,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 238,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 239,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 240,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 241,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 242,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 243,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 244,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 245,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            },
+            {
+              "x": 246,
+              "y": 391,
+              "rgb": [
+                105,
+                98,
+                91
+              ],
+              "relativeLuminance": 0.12493953574641073
+            }
+          ],
+          "method": "PNG pixel sampling: perimeter and target-box color frequency",
+          "measuredRatio": 1.693164014892572
+        }
+      },
+      "screenshot": "official-tc3-1792742475096/contrast.png",
+      "annotatedScreenshot": "official-tc3-1792742475096/contrast-annotated.png",
+      "sampledCoordinates": [
+        {
+          "x": 231,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 232,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 233,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 234,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 235,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 236,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 237,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 238,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 239,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 240,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 241,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 242,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 243,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 244,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 245,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        },
+        {
+          "x": 246,
+          "y": 391,
+          "rgb": [
+            105,
+            98,
+            91
+          ],
+          "relativeLuminance": 0.12493953574641073
+        }
+      ],
+      "measuredRatio": 1.693164014892572,
+      "requiredRatio": 4.5
+    },
+    "status": "pass",
+    "explanation": null,
+    "started_at": "2026-10-23T08:01:15.114Z",
+    "completed_at": "2026-10-23T08:01:15.595Z",
+    "expected": "Grey text (#hero-caption) displayed over a photo background must be evaluated by sampling screenshot pixels. The measured contrast ratio must fall below the WCAG AA 4.5:1 threshold (~1.69:1) and log 1 contrast finding with pixel coordinates and screenshot evidence.",
+    "actual": "Measured contrast ratio 1.693164014892572:1 against 4.5:1 threshold on #hero-caption using screenshot background pixel sampling. Produced 1 finding for WCAG 1.4.3 Contrast (Minimum) with screenshot and annotated screenshot evidence."
+  },
+  {
+    "id": "tr_tc4_initial_1792742476951",
+    "test_case": "TC4",
+    "input": {
+      "url": "http://localhost:4000/tc4",
+      "wcagLevel": "AA",
+      "checks": [
+        "keyboard-operability"
+      ],
+      "state": "broken"
+    },
+    "expected_result": "Initial audit against /tc4 (broken state) must detect custom button #add-to-cart is not keyboard operable, logging 1 finding for WCAG 2.1.1 Keyboard with screenshot and recording evidence.",
+    "actual_result": "Initial audit detected 1 finding for WCAG 2.1.1 Keyboard on #add-to-cart: control is not reachable or operable via keyboard. Created pending issue with screenshot evidence.",
+    "evidence": {
+      "auditId": "audit_c09942cb-831a-44c9-897a-e0fe5f465668",
+      "issue": {
+        "id": "fnd_b40069b209131867",
+        "fingerprint": "b40069b209131867",
+        "status": "pending_approval",
+        "screenshot": "audit_c09942cb-831a-44c9-897a-e0fe5f465668/operability-0.png",
+        "recording": "audit_c09942cb-831a-44c9-897a-e0fe5f465668/keyboard-operability.webm"
+      },
+      "findingsCount": 1,
+      "screenshot": "audit_c09942cb-831a-44c9-897a-e0fe5f465668/operability-0.png"
+    },
+    "status": "fail",
+    "explanation": "Page /tc4 failed keyboard operability check: custom button #add-to-cart is not keyboard operable.",
+    "started_at": "2026-10-23T08:01:16.393Z",
+    "completed_at": "2026-10-23T08:01:16.951Z",
+    "expected": "Initial audit against /tc4 (broken state) must detect custom button #add-to-cart is not keyboard operable, logging 1 finding for WCAG 2.1.1 Keyboard with screenshot and recording evidence.",
+    "actual": "Initial audit detected 1 finding for WCAG 2.1.1 Keyboard on #add-to-cart: control is not reachable or operable via keyboard. Created pending issue with screenshot evidence."
+  },
+  {
+    "id": "tr_tc4_retest_1792742477387",
+    "test_case": "TC4",
+    "input": {
+      "url": "http://localhost:4000/tc4",
+      "wcagLevel": "AA",
+      "checks": [
+        "keyboard-operability"
+      ],
+      "state": "fixed"
+    },
+    "expected_result": "Following fix deployment, retesting the logged issue on the exact same page using the same check must report zero violations and transition the issue to resolved.",
+    "actual_result": "Retest completed with 0 violations. Issue status transitioned to resolved with retest evidence preserved.",
+    "evidence": {
+      "auditId": "audit_2c52b4b9-b966-4e4e-a857-be04c95ed2c5",
+      "initialAuditId": "audit_c09942cb-831a-44c9-897a-e0fe5f465668",
+      "issueId": "fnd_b40069b209131867",
+      "fingerprint": "b40069b209131867",
+      "issueStatus": "resolved",
+      "outcome": {
+        "status": "pass",
+        "evidence": {
+          "auditId": "audit_2c52b4b9-b966-4e4e-a857-be04c95ed2c5",
+          "url": "http://localhost:4000/tc4",
+          "status": "complete",
+          "findings": [],
+          "checksPlanned": [
+            "keyboard-operability"
+          ],
+          "checksExecuted": [
+            {
+              "checkId": "keyboard-operability",
+              "status": "executed"
+            }
+          ],
+          "startedAt": "2026-10-23T08:01:16.966Z",
+          "completedAt": "2026-10-23T08:01:17.386Z"
+        }
+      },
+      "findingsCount": 0,
+      "initialEvidence": "audit_c09942cb-831a-44c9-897a-e0fe5f465668/operability-0.png"
+    },
+    "status": "pass",
+    "explanation": null,
+    "started_at": "2026-10-23T08:01:16.966Z",
+    "completed_at": "2026-10-23T08:01:17.387Z",
+    "expected": "Following fix deployment, retesting the logged issue on the exact same page using the same check must report zero violations and transition the issue to resolved.",
+    "actual": "Retest completed with 0 violations. Issue status transitioned to resolved with retest evidence preserved."
+  }
+]

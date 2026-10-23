@@ -1,10 +1,12 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+import { recordOfficialTestRun, type RecordOfficialTestRunOptions } from "../../engine/evidence";
 import type { TestCaseId, TestRunRecord, TestRunStatus } from "../../engine/types";
+
+export { recordOfficialTestRun, type RecordOfficialTestRunOptions };
 
 export interface WriteTestRunInput {
   id: string;
   test_case: TestCaseId;
+  auditId?: string;
   input: unknown;
   expected: string;
   actual: string;
@@ -13,19 +15,21 @@ export interface WriteTestRunInput {
   explanation?: string | null;
   started_at: string;
   completed_at: string;
+  store?: { recordTestRun: (record: TestRunRecord) => void };
 }
 
 /**
- * Writes an official test run record to /evidence/test-runs/<test_case>.json
- * conforming to PRD §10.4 and TestRunRecord.
+ * Writes an official test run record via recordOfficialTestRun.
  */
 export async function writeTestRun(data: WriteTestRunInput): Promise<string> {
-  const record: TestRunRecord = {
+  const record: TestRunRecord & { expected: string; actual: string } = {
     id: data.id,
     test_case: data.test_case,
     input: data.input,
     expected_result: data.expected,
+    expected: data.expected,
     actual_result: data.actual,
+    actual: data.actual,
     evidence: data.evidence,
     status: data.status,
     explanation: data.explanation ?? null,
@@ -33,16 +37,9 @@ export async function writeTestRun(data: WriteTestRunInput): Promise<string> {
     completed_at: data.completed_at,
   };
 
-  // Provide both expected_result / expected and actual_result / actual for full compatibility
-  const serialized = {
-    ...record,
-    expected: data.expected,
-    actual: data.actual,
-  };
-
-  const targetDir = path.resolve("evidence", "test-runs");
-  await fs.mkdir(targetDir, { recursive: true });
-  const targetFile = path.join(targetDir, `${data.test_case}.json`);
-  await fs.writeFile(targetFile, JSON.stringify(serialized, null, 2), "utf8");
-  return targetFile;
+  return await recordOfficialTestRun({
+    record,
+    auditId: data.auditId,
+    store: data.store,
+  });
 }

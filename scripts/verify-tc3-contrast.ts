@@ -2,10 +2,11 @@ import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { launchBrowser, navigate, newAuditContext } from "../engine/browser";
-import { highlightElement, saveScreenshot, writeEvidenceJson } from "../engine/evidence";
+import { highlightElement, saveScreenshot, recordOfficialTestRun } from "../engine/evidence";
 import { runAudit } from "../engine";
 import { startFixtureServer, stopFixtureServer } from "../fixtures/server";
-import type { AuditFinding, AuditResult } from "../engine";
+import { AuditStore } from "../src/persistence/sqlite";
+import type { AuditFinding, TestRunRecord } from "../engine";
 
 const PORT = Number(process.env.FIXTURE_PORT) || 4000;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -29,6 +30,8 @@ async function requireEvidence(relativePath: string | undefined): Promise<string
 
 async function run(): Promise<void> {
   let server: http.Server | null = null;
+  const store = await AuditStore.open();
+  const startedAt = new Date().toISOString();
 
   try {
     if (!(await isServerRunning())) {
@@ -72,22 +75,53 @@ async function run(): Promise<void> {
       await context.close();
       await browser.close();
       await requireEvidence(annotatedScreenshot);
-      const report = {
+
+      const completedAt = new Date().toISOString();
+
+      const record: TestRunRecord = {
+        id: `tr_tc3_${Date.now()}`,
+        test_case: "TC3",
         input: { url: `${BASE_URL}/tc3`, wcagLevel: "AA", checks: ["contrast"] },
-        expected: { status: "complete", findingCount: 1, measuredRatio: "1.69:1", requiredRatio: "4.5:1" },
-        actual: result,
-        sampledCoordinates: evidence.samples,
-        evidence: { screenshot, annotatedScreenshot },
-        verdict: "PASS",
+        expected_result: "Grey text (#hero-caption) displayed over a photo background must be evaluated by sampling screenshot pixels. The measured contrast ratio must fall below the WCAG AA 4.5:1 threshold (~1.69:1) and log 1 contrast finding with pixel coordinates and screenshot evidence.",
+        actual_result: `Measured contrast ratio ${evidence.measuredRatio}:1 against 4.5:1 threshold on #hero-caption using screenshot background pixel sampling. Produced 1 finding for WCAG 1.4.3 Contrast (Minimum) with screenshot and annotated screenshot evidence.`,
+        evidence: {
+          auditId: AUDIT_ID,
+          finding: {
+            title: finding.title,
+            wcagRule: finding.wcagRule,
+            severity: finding.severity,
+            selector: finding.selector,
+            screenshot,
+            annotatedScreenshot,
+            evidence: finding.evidence,
+          },
+          screenshot,
+          annotatedScreenshot,
+          sampledCoordinates: evidence.samples,
+          measuredRatio: evidence.measuredRatio,
+          requiredRatio: evidence.requiredRatio,
+        },
+        status: "pass",
+        explanation: null,
+        started_at: startedAt,
+        completed_at: completedAt,
       };
-      const reportPath = await writeEvidenceJson(AUDIT_ID, "official-report", report);
-      console.log(JSON.stringify({ auditId: AUDIT_ID, report: reportPath, verdict: report.verdict }, null, 2));
+
+      await recordOfficialTestRun({
+        record,
+        auditId: AUDIT_ID,
+        store,
+      });
+
+      const reportPath = path.join(AUDIT_ID, "official-report.json");
+      console.log(JSON.stringify({ auditId: AUDIT_ID, report: reportPath, verdict: "PASS" }, null, 2));
     } finally {
       if (!page.isClosed()) await page.close();
       if (!context.browser()?.isConnected()) return;
       await browser.close();
     }
   } finally {
+    store.close();
     if (server) await stopFixtureServer(server);
   }
 }

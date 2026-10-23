@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import pathModule from "node:path";
 import initSqlJs, { type Database } from "sql.js";
-import type { AuditFinding, AuditInput, AuditResult } from "../../engine/types";
+import type { AuditFinding, AuditInput, AuditResult, TestCaseId, TestRunRecord, TestRunStatus } from "../../engine/types";
 
 export type IssueStatus = "pending_approval" | "approved_logged" | "rejected" | "retesting" | "resolved";
 export type RetestStatus = "pass" | "fail" | "incomplete";
@@ -274,5 +274,54 @@ export class AuditStore {
       this.database.run("ROLLBACK");
       throw error;
     }
+  }
+
+  recordTestRun(record: TestRunRecord): void {
+    if (record.test_case !== "TC4") {
+      this.run("DELETE FROM test_runs WHERE test_case = ?", [record.test_case]);
+    } else {
+      const slot = record.id.includes("initial") ? "%initial%" : "%retest%";
+      this.run("DELETE FROM test_runs WHERE test_case = 'TC4' AND id LIKE ?", [slot]);
+    }
+    this.run(
+      `INSERT OR REPLACE INTO test_runs
+       (id, test_case, input_json, expected_result, actual_result, evidence_json, status, explanation, started_at, completed_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        record.id,
+        record.test_case,
+        json(record.input),
+        typeof record.expected_result === "string" ? record.expected_result : json(record.expected_result),
+        typeof record.actual_result === "string" ? record.actual_result : json(record.actual_result),
+        json(record.evidence),
+        record.status,
+        record.explanation ?? null,
+        record.started_at,
+        record.completed_at,
+      ],
+    );
+  }
+
+  getTestRun(idOrCase: string): TestRunRecord | undefined {
+    const value = this.one("SELECT * FROM test_runs WHERE id = ? OR test_case = ?", [idOrCase, idOrCase]);
+    if (!value) return undefined;
+    return {
+      id: requiredString(value.id, "id"),
+      test_case: requiredString(value.test_case, "test_case") as TestCaseId,
+      input: JSON.parse(requiredString(value.input_json, "input_json")),
+      expected_result: typeof value.expected_result === "string" ? value.expected_result : JSON.parse(requiredString(value.expected_result, "expected_result")),
+      actual_result: typeof value.actual_result === "string" ? value.actual_result : value.actual_result ? JSON.parse(value.actual_result as string) : null,
+      evidence: typeof value.evidence_json === "string" ? (value.evidence_json.startsWith("{") || value.evidence_json.startsWith("[") ? JSON.parse(value.evidence_json) : value.evidence_json) : null,
+      status: requiredString(value.status, "status") as TestRunStatus,
+      explanation: typeof value.explanation === "string" ? value.explanation : null,
+      started_at: requiredString(value.started_at, "started_at"),
+      completed_at: requiredString(value.completed_at, "completed_at"),
+    };
+  }
+
+  listTestRuns(): TestRunRecord[] {
+    return this.many("SELECT id FROM test_runs ORDER BY started_at ASC")
+      .map((row) => this.getTestRun(requiredString(row.id, "id")))
+      .filter((tr): tr is TestRunRecord => tr !== undefined);
   }
 }
