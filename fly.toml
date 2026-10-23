@@ -1,0 +1,40 @@
+# fly.toml app configuration file for WCAG Accessibility Auditor
+# Deployment configuration for Fly.io
+
+app = "wcag-accessibility-auditor"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[http_service.checks]]
+  grace_period = "15s"
+  interval = "15s"
+  method = "GET"
+  timeout = "5s"
+  path = "/health"
+
+# Memory sizing: Headless Chromium with video recording requires >= 1GB (2048mb recommended)
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "2048mb"
+
+# Optional persistent volume for SQLite persistence:
+# To attach:
+#   fly volumes create auditor_data --region iad --size 1
+# And uncomment the block below:
+# [mounts]
+#   source = "auditor_data"
+#   destination = "/app/data"

@@ -27,7 +27,13 @@ let defaultBrowser: Browser | null = null;
  */
 export async function launchBrowser(): Promise<Browser> {
   const headless = process.env.HEADLESS !== "false";
-  const browser = await chromium.launch({ headless });
+  const args = [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+  ];
+  const browser = await chromium.launch({ headless, args });
   defaultBrowser = browser;
   return browser;
 }

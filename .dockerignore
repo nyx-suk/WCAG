@@ -1,0 +1,21 @@
+node_modules
+.git
+.gemini
+.github
+.DS_Store
+*.log
+npm-debug.log*
+
+# Ephemeral runtime data & evidence captures
+data/*.sqlite
+evidence/audit_*
+evidence/dev-*
+evidence/test-audit-*
+evidence/test-tc*
+evidence/repeat-*
+evidence/tc1-*
+evidence/tc2-*
+evidence/tc4-*
+evidence/official-tc3-*
+evidence/screenshots
+evidence/recordings
