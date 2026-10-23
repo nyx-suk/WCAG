@@ -330,11 +330,19 @@ auditForm?.addEventListener("submit", async (e) => {
       body: JSON.stringify({ url, wcagLevel, checks }),
     });
 
-    const body = await res.json();
+    const text = await res.text();
+    let body;
+    try {
+      body = text ? JSON.parse(text) : {};
+    } catch {
+      throw new Error(
+        `Server returned non-JSON HTTP ${res.status} (${res.statusText || "Empty"}). The audit container may have run out of memory while launching Chromium (requires >= 1GB RAM) or the connection was reset.`
+      );
+    }
 
     if (!res.ok) {
       auditStatusBanner.className = "banner banner-error";
-      auditStatusText.textContent = `Audit Failed: ${body.error || "Execution error"}`;
+      auditStatusText.textContent = `Audit Failed: ${body.error || text || `HTTP ${res.status}`}`;
       return;
     }
 
