@@ -205,10 +205,18 @@ export function createAuditApp(options: AuditApiOptions): Express {
       return;
     }
     const input: AuditInput = { ...partial, auditId: `audit_${randomUUID()}` };
-    options.store.createAudit(input);
     try {
+      try {
+        options.store.createAudit(input);
+      } catch (storeErr) {
+        console.error("[api] Failed to initialize audit in store:", storeErr);
+      }
       const result = await options.runAudit(input);
-      options.store.saveAuditResult(result);
+      try {
+        options.store.saveAuditResult(result);
+      } catch (saveErr) {
+        console.error("[api] Failed to save audit result in store:", saveErr);
+      }
       res.status(201).json({ audit: options.store.getAudit(result.auditId), issues: options.store.listIssues(result.auditId) });
     } catch (error) {
       if (error instanceof ValidationError || (isRecord(error) && error.name === "ValidationError")) {
@@ -216,7 +224,11 @@ export function createAuditApp(options: AuditApiOptions): Express {
         return;
       }
       const result = errorResult(input, error);
-      options.store.saveAuditResult(result);
+      try {
+        options.store.saveAuditResult(result);
+      } catch (saveErr) {
+        console.error("[api] Failed to save error result to store:", saveErr);
+      }
       sendError(res, 502, error instanceof Error ? error.message : "Audit execution failed.");
     }
   });

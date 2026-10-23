@@ -16,7 +16,7 @@ if (process.env.RESET_ON_STARTUP === "true") {
 
 const server = http.createServer(createAuditApp({ store, runAudit }));
 
-server.listen(port, () => {
+server.listen(port, "0.0.0.0", () => {
   console.log(`[api] Server running on port ${port}`);
   console.log(`[api] Local dashboard: http://localhost:${port}`);
   if (publicBaseUrl) {
