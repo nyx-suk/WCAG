@@ -143,3 +143,80 @@ test("retest API keeps failing issues open and resolves only after a pass", asyn
     assert.equal(audits.flatMap((audit) => audit.issues).find((issue) => issue.status === "resolved")?.status, "resolved");
   });
 });
+
+test("new API query routes: GET /api/audits/:id, GET /api/issues, GET /api/issues/:id, GET /api/test-runs", async () => {
+  await withApi(async (input) => resultFor(input, true), async (baseUrl) => {
+    // Missing audit -> 404
+    const notFoundAudit = await fetch(`${baseUrl}/api/audits/non-existent`);
+    assert.equal(notFoundAudit.status, 404);
+
+    // Create an audit
+    const created = await fetch(`${baseUrl}/api/audits`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: "http://localhost:4000/tc4", wcagLevel: "AA" }),
+    });
+    const createdBody = await created.json() as { audit: { auditId: string }; issues: Array<{ id: string }> };
+    const auditId = createdBody.audit.auditId;
+    const issueId = createdBody.issues[0].id;
+
+    // GET /api/audits/:id
+    const singleAudit = await fetch(`${baseUrl}/api/audits/${auditId}`);
+    assert.equal(singleAudit.status, 200);
+    const singleAuditBody = await singleAudit.json() as { audit: { auditId: string }; issues: unknown[] };
+    assert.equal(singleAuditBody.audit.auditId, auditId);
+    assert.equal(singleAuditBody.issues.length, 1);
+
+    // GET /api/issues
+    const allIssues = await fetch(`${baseUrl}/api/issues`);
+    assert.equal(allIssues.status, 200);
+    const issuesList = await allIssues.json() as Array<{ id: string; status: string }>;
+    assert.equal(issuesList.length, 1);
+    assert.equal(issuesList[0].status, "pending_approval");
+
+    // Filter by status: open vs pending_approval
+    const openIssues = await (await fetch(`${baseUrl}/api/issues?status=open`)).json() as unknown[];
+    assert.equal(openIssues.length, 0);
+
+    const pendingIssues = await (await fetch(`${baseUrl}/api/issues?status=pending_approval`)).json() as unknown[];
+    assert.equal(pendingIssues.length, 1);
+
+    // GET /api/issues/:id
+    const singleIssue = await fetch(`${baseUrl}/api/issues/${issueId}`);
+    assert.equal(singleIssue.status, 200);
+    const singleIssueBody = await singleIssue.json() as {
+      issue: { id: string };
+      history: Array<{ to: string }>;
+      retests: unknown[];
+    };
+    assert.equal(singleIssueBody.issue.id, issueId);
+    assert.ok(singleIssueBody.history.length >= 1);
+    assert.equal(singleIssueBody.history[0].to, "pending_approval");
+
+    // Missing issue -> 404
+    const notFoundIssue = await fetch(`${baseUrl}/api/issues/missing-id`);
+    assert.equal(notFoundIssue.status, 404);
+
+    // GET /api/test-runs
+    const testRuns = await fetch(`${baseUrl}/api/test-runs`);
+    assert.equal(testRuns.status, 200);
+    const testRunsList = await testRuns.json() as unknown[];
+    assert.ok(Array.isArray(testRunsList));
+  });
+});
+
+test("static evidence serving protects against path traversal and serves files", async () => {
+  await withApi(async (input) => resultFor(input, false), async (baseUrl) => {
+    // Path traversal attempt via double encoding -> 403
+    const traversal = await fetch(`${baseUrl}/evidence/%252e%252e/package.json`);
+    assert.equal(traversal.status, 403);
+
+    // Missing evidence file -> 404
+    const missing = await fetch(`${baseUrl}/evidence/non-existent-folder/missing.png`);
+    assert.equal(missing.status, 404);
+
+    // Fixture mounted route check
+    const fixtureHealth = await fetch(`${baseUrl}/health`);
+    assert.equal(fixtureHealth.status, 200);
+  });
+});

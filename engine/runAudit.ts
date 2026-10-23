@@ -10,7 +10,7 @@ import {
 } from "./browser";
 import { runKeyboardTrapCheck } from "./checks/keyboardTrap";
 import { runKeyboardOperabilityCheck } from "./checks/keyboardOperability";
-import type { AuditFinding, AuditInput, AuditResult, CheckId } from "./types";
+import type { AuditFinding, AuditInput, AuditPlan, AuditResult, AuditStepLog, CheckId, PlannedCheck } from "./types";
 import { ValidationError } from "./errors";
 import { makeFingerprint } from "./fingerprint";
 import path from "node:path";
@@ -147,6 +147,54 @@ async function runContrast(
   };
 }
 
+export function buildAuditPlan(
+  input: AuditInput,
+  pageFeatures?: { hasDialogs?: boolean; hasImages?: boolean },
+): AuditPlan {
+  const planned = input.checks ?? allChecks;
+  const isRetest = Boolean(input.checks && input.checks.length < allChecks.length);
+
+  const checks: PlannedCheck[] = planned.map((checkId) => {
+    switch (checkId) {
+      case "axe":
+        return {
+          checkId,
+          reason: `Automated baseline scan for machine-detectable WCAG ${input.wcagLevel} rule violations across DOM elements and ARIA attributes.`,
+        };
+      case "keyboard-trap":
+        return {
+          checkId,
+          reason: pageFeatures?.hasDialogs
+            ? "Page contains dialog/modal or overlay triggers; testing Tab/Shift+Tab focus containment and Escape dismissal."
+            : "Simulate keyboard navigation (Tab/Shift+Tab/Escape) to detect focus containment loops and traps.",
+        };
+      case "keyboard-operability":
+        return {
+          checkId,
+          reason: "Verify that custom controls, button-styled elements, and clickable targets can be reached and activated via Tab, Enter, and Space.",
+        };
+      case "contrast":
+        return {
+          checkId,
+          reason: pageFeatures?.hasImages
+            ? "Visual media / image elements detected on page; sampling background pixels behind text to measure WCAG AA contrast ratio."
+            : "Sample screenshot pixels behind text candidates to verify WCAG AA minimum contrast ratio (4.5:1 normal, 3:1 large).",
+        };
+      default:
+        return {
+          checkId,
+          reason: "Planned standard accessibility verification check.",
+        };
+    }
+  });
+
+  const summary = isRetest
+    ? `Isolated retest plan: executing [${planned.join(", ")}] to verify resolution of reported defect.`
+    : `Comprehensive audit plan: executing ${planned.length} checks ([${planned.join(", ")}]) for WCAG Level ${input.wcagLevel}.`;
+
+  return { summary, checks };
+}
+
 export async function runAudit(input: AuditInput): Promise<AuditResult> {
   // 1. Validate auditId: trimmed nonempty string, at most 100 characters, only [A-Za-z0-9._-]
   if (!input.auditId || typeof input.auditId !== "string" || input.auditId.trim().length === 0) {
@@ -212,9 +260,21 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
   const startedAt = new Date().toISOString();
   const planned = input.checks ?? allChecks;
   const checksExecuted: AuditResult["checksExecuted"] = [];
+  const checkDurations: Partial<Record<CheckId, number>> = {};
   const findings: AuditFinding[] = [];
   let axeSummary: AuditResult["axeSummary"];
   let status: AuditResult["status"] = "complete";
+
+  const steps: AuditStepLog[] = [
+    {
+      step: "collect",
+      status: "complete",
+      timestamp: startedAt,
+      summary: `Collected target URL ${input.url} and WCAG level ${input.wcagLevel}.`,
+      details: { url: input.url, wcagLevel: input.wcagLevel, auditId: input.auditId },
+    },
+  ];
+
   const browser = await launchBrowser();
   const context = await newAuditContext(browser);
   const page = await context.newPage();
@@ -228,6 +288,26 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
       for (const checkId of planned) {
         checksExecuted.push({ checkId, status: "failed", error: errorMsg });
       }
+      const navPlan = buildAuditPlan(input);
+      steps.push({
+        step: "plan",
+        status: "complete",
+        timestamp: new Date().toISOString(),
+        summary: navPlan.summary,
+        details: { plan: navPlan },
+      });
+      steps.push({
+        step: "find",
+        status: "failed",
+        timestamp: new Date().toISOString(),
+        summary: `Navigation failure to ${input.url}: ${errorMsg}`,
+      });
+      steps.push({
+        step: "act",
+        status: "failed",
+        timestamp: new Date().toISOString(),
+        summary: "Audit aborted due to navigation failure.",
+      });
       return {
         auditId: input.auditId,
         url: input.url,
@@ -235,21 +315,49 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
         findings,
         checksPlanned: planned,
         checksExecuted,
+        plan: navPlan,
+        steps,
         axeSummary,
         startedAt,
         completedAt: new Date().toISOString(),
       };
     }
 
+    // Inspect page characteristics to contextualize the plan
+    let hasDialogs = false;
+    let hasImages = false;
+    try {
+      hasDialogs = await page.evaluate(() => {
+        return Boolean(document.querySelector('dialog, [role="dialog"], button[aria-haspopup], [id*="modal"], [class*="modal"]'));
+      });
+      hasImages = await page.evaluate(() => {
+        return Boolean(document.querySelector('img, svg, picture, [style*="background-image"], .hero, .banner'));
+      });
+    } catch {
+      // ignore
+    }
+
+    const plan = buildAuditPlan(input, { hasDialogs, hasImages });
+    steps.push({
+      step: "plan",
+      status: "complete",
+      timestamp: new Date().toISOString(),
+      summary: plan.summary,
+      details: { plan },
+    });
+
     for (const checkId of planned) {
+      const checkStart = Date.now();
       if (checkId === "axe") {
         try {
           const timeoutMs = getCheckTimeout("axe", AXE_TIMEOUT_MS);
           const axe = await withTimeout(runAxe(page, input), timeoutMs, "axe");
           findings.push(...axe.findings);
           axeSummary = axe.summary;
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({ checkId, status: "executed" });
         } catch (error) {
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({
             checkId,
             status: "failed",
@@ -273,6 +381,7 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
               ? contrastModuleOverride
               : await import(modulePath);
         } catch {
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({
             checkId,
             status: "skipped",
@@ -289,6 +398,7 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
           typeof runContrastCheckFn !== "function" &&
           typeof sampleContrastFn !== "function"
         ) {
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({
             checkId,
             status: "skipped",
@@ -317,8 +427,10 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
             );
             if (finding) findings.push(finding);
           }
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({ checkId, status: "executed" });
         } catch (error) {
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({
             checkId,
             status: "failed",
@@ -334,8 +446,10 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
             browser,
           });
           findings.push(...trapFindings);
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({ checkId, status: "executed" });
         } catch (error) {
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({
             checkId,
             status: "failed",
@@ -351,8 +465,10 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
             browser,
           });
           findings.push(...operabilityFindings);
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({ checkId, status: "executed" });
         } catch (error) {
+          checkDurations[checkId] = Math.max(0, Date.now() - checkStart);
           checksExecuted.push({
             checkId,
             status: "failed",
@@ -361,6 +477,7 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
           status = "incomplete";
         }
       } else {
+        (checkDurations as Record<string, number>)[checkId] = Math.max(0, Date.now() - checkStart);
         checksExecuted.push({
           checkId,
           status: "skipped",
@@ -395,6 +512,29 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
     }
   }
 
+  // Step 3: Find
+  steps.push({
+    step: "find",
+    status: status === "complete" ? "complete" : "failed",
+    timestamp: new Date().toISOString(),
+    summary: `Identified ${deduplicatedFindings.length} finding(s) across ${checksExecuted.length} executed check(s).`,
+    details: { findingsCount: deduplicatedFindings.length, checksExecuted },
+  });
+
+  // Step 4: Act
+  const actSummary =
+    deduplicatedFindings.length > 0
+      ? `Presenting ${deduplicatedFindings.length} proposed finding(s) for human review and approval before logging.`
+      : "Audit completed with 0 findings; no issues requiring approval.";
+
+  steps.push({
+    step: "act",
+    status: deduplicatedFindings.length > 0 ? "pending" : "complete",
+    timestamp: new Date().toISOString(),
+    summary: actSummary,
+    details: { pendingApprovalCount: deduplicatedFindings.length },
+  });
+
   return {
     auditId: input.auditId,
     url: input.url,
@@ -402,6 +542,9 @@ export async function runAudit(input: AuditInput): Promise<AuditResult> {
     findings: deduplicatedFindings,
     checksPlanned: planned,
     checksExecuted,
+    checkDurations,
+    plan: steps.find((s) => s.step === "plan")?.details?.plan as AuditPlan | undefined,
+    steps,
     axeSummary,
     startedAt,
     completedAt: new Date().toISOString(),

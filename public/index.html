@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WCAG Accessibility Auditor</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="app-header" role="banner">
+    <div class="header-container">
+      <div>
+        <h1 class="brand-title">WCAG Accessibility Auditor</h1>
+        <p class="brand-subtitle">AI-Assisted Web Accessibility Agent & Verification Dashboard</p>
+      </div>
+      <div id="fixture-indicator" aria-live="polite">
+        <span class="badge badge-minor" id="tc2-state-badge">TC2: Broken</span>
+        <span class="badge badge-minor" id="tc4-state-badge">TC4: Broken</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="app-nav" aria-label="Main Navigation">
+    <div class="nav-container" role="tablist">
+      <button class="nav-tab" role="tab" id="tab-new-audit" aria-selected="true" aria-controls="panel-new-audit" tabindex="0">
+        New Audit
+      </button>
+      <button class="nav-tab" role="tab" id="tab-proposed" aria-selected="false" aria-controls="panel-proposed" tabindex="-1">
+        Proposed Findings
+        <span id="badge-proposed-count" class="badge-count" style="display:none;" aria-label="pending approval count">0</span>
+      </button>
+      <button class="nav-tab" role="tab" id="tab-issues" aria-selected="false" aria-controls="panel-issues" tabindex="-1">
+        Issues Dashboard
+      </button>
+      <button class="nav-tab" role="tab" id="tab-issue-detail" aria-selected="false" aria-controls="panel-issue-detail" tabindex="-1">
+        Issue Detail & Retest
+      </button>
+      <button class="nav-tab" role="tab" id="tab-test-runs" aria-selected="false" aria-controls="panel-test-runs" tabindex="-1">
+        Official Test Runs
+      </button>
+    </div>
+  </nav>
+
+  <main id="main-content" class="main-content" tabindex="-1">
+    <!-- SCREEN 1: NEW AUDIT -->
+    <section id="panel-new-audit" class="tab-panel active" role="tabpanel" aria-labelledby="tab-new-audit">
+      <div class="card">
+        <h2 class="card-title">Run Accessibility Audit</h2>
+        <p class="card-description">
+          Initiate an automated and manual-simulated accessibility check on any web URL.
+        </p>
+
+        <!-- Quick-Fill and Fixture Controls -->
+        <div class="quick-fill-group">
+          <h3 class="quick-fill-title">Quick-Fill Demo Fixtures</h3>
+          <div class="btn-group" style="margin-bottom: 1rem;">
+            <button type="button" class="btn btn-secondary" id="btn-fill-tc1">TC1: Modal Trap (/tc1/bad)</button>
+            <button type="button" class="btn btn-secondary" id="btn-fill-tc2">TC2: Keyboard Failure (/tc2)</button>
+            <button type="button" class="btn btn-secondary" id="btn-fill-tc3">TC3: Contrast (/tc3)</button>
+            <button type="button" class="btn btn-secondary" id="btn-fill-tc4">TC4: Retest Lifecycle (/tc4)</button>
+          </div>
+
+          <h3 class="quick-fill-title">Fixture State Toggles</h3>
+          <div class="btn-group">
+            <button type="button" class="btn btn-secondary" id="btn-toggle-tc2">Toggle TC2 (Broken / Fixed)</button>
+            <button type="button" class="btn btn-secondary" id="btn-toggle-tc4">Toggle TC4 (Broken / Fixed)</button>
+            <button type="button" class="btn btn-secondary" id="btn-reset-fixtures">Reset Fixtures to Broken</button>
+          </div>
+        </div>
+
+        <form id="audit-form" novalidate>
+          <div class="form-group">
+            <label for="audit-url" class="form-label">Target Website URL <span aria-hidden="true">*</span></label>
+            <input type="url" id="audit-url" name="url" class="form-input" required placeholder="http://localhost:3000/tc2" value="">
+          </div>
+
+          <div class="form-group">
+            <label for="audit-level" class="form-label">WCAG Conformance Level</label>
+            <select id="audit-level" name="wcagLevel" class="form-select">
+              <option value="A">Level A</option>
+              <option value="AA" selected>Level AA (Standard)</option>
+              <option value="AAA">Level AAA</option>
+            </select>
+          </div>
+
+          <fieldset class="form-group" style="border:none;">
+            <legend class="form-label">Active Checks</legend>
+            <div style="display:flex; flex-wrap:wrap; gap:1.25rem; margin-top:0.25rem;">
+              <label style="display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                <input type="checkbox" name="checks" value="axe" checked> axe-core automated scanner
+              </label>
+              <label style="display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                <input type="checkbox" name="checks" value="keyboard-operability" checked> Keyboard operability check
+              </label>
+              <label style="display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                <input type="checkbox" name="checks" value="keyboard-trap" checked> Keyboard trap detector
+              </label>
+              <label style="display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                <input type="checkbox" name="checks" value="contrast" checked> Visual contrast pixel sampler
+              </label>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn btn-primary" id="btn-run-audit">
+            Run Audit
+          </button>
+        </form>
+      </div>
+
+      <!-- Audit Execution Status & Results Box -->
+      <div id="audit-status-card" class="card" style="display:none;" aria-live="polite">
+        <h3 class="card-title" id="audit-status-heading">Audit Status</h3>
+        <div id="audit-status-banner" class="banner banner-info">
+          <span id="audit-status-text">Preparing audit execution...</span>
+        </div>
+
+        <div id="audit-plan-summary" style="margin-bottom: 1.25rem;"></div>
+
+        <!-- 4-Step Agent Workflow Timeline (§9.1) -->
+        <div id="audit-workflow-container" style="margin-top:1.5rem;">
+          <h4 style="font-size:1.1rem; margin-bottom:0.75rem; font-weight:700;">Agent Workflow Timeline (§9.1: Collect, Plan, Find, Act)</h4>
+          <div class="workflow-timeline" id="workflow-timeline-list"></div>
+        </div>
+
+        <div id="audit-result-actions" style="display:none; margin-top: 1rem;">
+          <button type="button" class="btn btn-primary" id="btn-goto-proposed">
+            Review Proposed Findings
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: PROPOSED FINDINGS REVIEW -->
+    <section id="panel-proposed" class="tab-panel" role="tabpanel" aria-labelledby="tab-proposed">
+      <div class="card">
+        <h2 class="card-title">Proposed Findings Review</h2>
+        <p class="card-description">
+          Review potential accessibility issues detected by automated scanners and manual simulations.
+          Issues remain in <strong>pending_approval</strong> and are not committed to the approved issue log until explicitly approved.
+        </p>
+        <div id="proposed-banner" style="display:none;"></div>
+        <div id="proposed-findings-list" aria-live="polite">
+          <p style="color:var(--color-text-muted);">Loading proposed findings...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: ISSUES DASHBOARD -->
+    <section id="panel-issues" class="tab-panel" role="tabpanel" aria-labelledby="tab-issues">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+          <div>
+            <h2 class="card-title" style="margin-bottom:0.25rem;">Issues Dashboard</h2>
+            <p class="card-description" style="margin-bottom:0;">
+              Track approved issues, status lifecycles, and verification outcomes across all audits.
+            </p>
+          </div>
+          <div>
+            <label for="issue-status-filter" class="form-label" style="display:inline; margin-right:0.5rem;">Filter by Status:</label>
+            <select id="issue-status-filter" class="form-select" style="display:inline-block; width:auto;">
+              <option value="">All Statuses</option>
+              <option value="pending_approval">Pending Approval</option>
+              <option value="approved_logged">Approved (Open)</option>
+              <option value="retesting">Retesting</option>
+              <option value="resolved">Resolved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="issues-list" aria-live="polite">
+          <p style="color:var(--color-text-muted);">Loading issues...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: ISSUE DETAIL & RETEST -->
+    <section id="panel-issue-detail" class="tab-panel" role="tabpanel" aria-labelledby="tab-issue-detail">
+      <div class="card" id="issue-detail-card">
+        <div id="issue-detail-content">
+          <p style="color:var(--color-text-muted);">No issue selected. Select an issue from the Issues Dashboard to view details and trigger a retest.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 5: OFFICIAL TEST RUNS -->
+    <section id="panel-test-runs" class="tab-panel" role="tabpanel" aria-labelledby="tab-test-runs">
+      <div class="card">
+        <h2 class="card-title">Official Evaluation Test Runs (TC1 - TC4)</h2>
+        <p class="card-description">
+          Verified test run records matching PRD §8 and §10.4 schema requirements.
+        </p>
+        <div id="test-runs-container" class="table-responsive" aria-live="polite">
+          <p style="color:var(--color-text-muted);">Loading official test run records...</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

@@ -7,6 +7,24 @@ import type { AuditFinding, AuditInput, AuditResult, TestCaseId, TestRunRecord, 
 export type IssueStatus = "pending_approval" | "approved_logged" | "rejected" | "retesting" | "resolved";
 export type RetestStatus = "pass" | "fail" | "incomplete";
 
+export interface IssueStatusChange {
+  from: IssueStatus | null;
+  to: IssueStatus;
+  changedAt: string;
+}
+
+export interface StoredRetest {
+  id: string;
+  issueId: string;
+  auditId: string;
+  status: RetestStatus;
+  evidence?: unknown;
+  screenshot?: string;
+  recording?: string;
+  startedAt: string;
+  completedAt?: string;
+}
+
 export interface RetestOutcome {
   status: RetestStatus;
   evidence?: unknown;
@@ -109,6 +127,24 @@ export class AuditStore {
     this.database.close();
   }
 
+  reset(): void {
+    this.database.run("BEGIN");
+    try {
+      this.run("DELETE FROM retests");
+      this.run("DELETE FROM issue_status_history");
+      this.run("DELETE FROM issues");
+      this.run("DELETE FROM audits");
+      this.database.run("COMMIT");
+      if (this.filePath) {
+        mkdirSync(pathModule.dirname(this.filePath), { recursive: true });
+        writeFileSync(this.filePath, Buffer.from(this.database.export()));
+      }
+    } catch (err) {
+      this.database.run("ROLLBACK");
+      throw err;
+    }
+  }
+
   private run(sql: string, params: SqlParam[] = []): void {
     const statement = this.database.prepare(sql);
     try {
@@ -155,17 +191,25 @@ export class AuditStore {
         result.status, json(result), result.completedAt, result.auditId,
       ]);
       for (const finding of result.findings) {
+        const issueId = `fnd_${finding.fingerprint}`;
         this.run(
           `INSERT OR IGNORE INTO issues
            (id, audit_id, page_url, title, description, wcag_rule, severity, source, selector, fingerprint,
             status, evidence_json, screenshot, recording, created_at, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending_approval', ?, ?, ?, ?, ?)`,
           [
-            `fnd_${finding.fingerprint}`, result.auditId, result.url, finding.title, finding.description,
+            issueId, result.auditId, result.url, finding.title, finding.description,
             finding.wcagRule, finding.severity, finding.source, finding.selector ?? null, finding.fingerprint,
             json(finding.evidence), finding.screenshot ?? null, finding.recording ?? null, result.startedAt, result.completedAt,
           ],
         );
+        const existingHistory = this.one("SELECT id FROM issue_status_history WHERE issue_id = ?", [issueId]);
+        if (!existingHistory) {
+          this.run(
+            "INSERT INTO issue_status_history (issue_id, from_status, to_status, changed_at) VALUES (?, NULL, 'pending_approval', ?)",
+            [issueId, result.startedAt],
+          );
+        }
       }
       this.database.run("COMMIT");
     } catch (error) {
@@ -225,6 +269,34 @@ export class AuditStore {
     };
   }
 
+  getIssueStatusHistory(issueId: string): IssueStatusChange[] {
+    return this.many(
+      "SELECT from_status, to_status, changed_at FROM issue_status_history WHERE issue_id = ? ORDER BY id ASC",
+      [issueId],
+    ).map((row) => ({
+      from: (row.from_status as IssueStatus) ?? null,
+      to: requiredString(row.to_status, "to_status") as IssueStatus,
+      changedAt: requiredString(row.changed_at, "changed_at"),
+    }));
+  }
+
+  getIssueRetests(issueId: string): StoredRetest[] {
+    return this.many(
+      "SELECT * FROM retests WHERE issue_id = ? ORDER BY started_at ASC",
+      [issueId],
+    ).map((row) => ({
+      id: requiredString(row.id, "id"),
+      issueId: requiredString(row.issue_id, "issue_id"),
+      auditId: requiredString(row.audit_id, "audit_id"),
+      status: requiredString(row.status, "status") as RetestStatus,
+      evidence: typeof row.evidence_json === "string" ? JSON.parse(row.evidence_json) : undefined,
+      screenshot: typeof row.screenshot === "string" ? row.screenshot : undefined,
+      recording: typeof row.recording === "string" ? row.recording : undefined,
+      startedAt: requiredString(row.started_at, "started_at"),
+      completedAt: typeof row.completed_at === "string" ? row.completed_at : undefined,
+    }));
+  }
+
   updateIssueStatus(id: string, toStatus: IssueStatus, changedAt = new Date().toISOString()): void {
     const issue = this.getIssue(id);
     if (!issue) throw new Error(`Issue '${id}' was not found.`);
@@ -277,12 +349,7 @@ export class AuditStore {
   }
 
   recordTestRun(record: TestRunRecord): void {
-    if (record.test_case !== "TC4") {
-      this.run("DELETE FROM test_runs WHERE test_case = ?", [record.test_case]);
-    } else {
-      const slot = record.id.includes("initial") ? "%initial%" : "%retest%";
-      this.run("DELETE FROM test_runs WHERE test_case = 'TC4' AND id LIKE ?", [slot]);
-    }
+    this.run("DELETE FROM test_runs WHERE test_case = ?", [record.test_case]);
     this.run(
       `INSERT OR REPLACE INTO test_runs
        (id, test_case, input_json, expected_result, actual_result, evidence_json, status, explanation, started_at, completed_at)

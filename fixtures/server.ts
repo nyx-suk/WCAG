@@ -29,6 +29,10 @@ export function getFixtureState(): Readonly<FixtureServerState> {
   return serverState;
 }
 
+export function setFixtureState(partial: Partial<FixtureServerState>): void {
+  serverState = { ...serverState, ...partial };
+}
+
 export function createFixtureApp(): Express {
   const app = express();
 
