@@ -347,7 +347,7 @@ async function main(): Promise<void> {
   const zipPath = path.join(SUBMISSION_DIR, "wcag-accessibility-auditor-source.zip");
   try {
     execSync(
-      `zip -q -r "${zipPath}" . -x "node_modules/*" ".git/*" ".gemini/*" "data/*" "submission/*" "dist/*" ".DS_Store"`,
+      `zip -q -r "${zipPath}" . -x "node_modules/*" ".git/*" ".gemini/*" "data/*" "submission/*" "dist/*" "evidence/*" ".DS_Store"`,
       { cwd: ROOT_DIR }
     );
     console.log(`  Created ${zipPath} (${((await fs.stat(zipPath)).size / 1024 / 1024).toFixed(2)} MB)`);

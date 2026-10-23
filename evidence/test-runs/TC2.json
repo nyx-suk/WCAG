@@ -1,5 +1,5 @@
 {
-  "id": "tr_tc2_1792776473976",
+  "id": "tr_tc2_1792776773545",
   "test_case": "TC2",
   "input": {
     "url": "http://localhost:4000/tc2",
@@ -11,10 +11,10 @@
   },
   "expected_result": "axe-core automated scanning against /tc2 must report zero violations, while manual keyboard interaction testing identifies custom control #add-to-cart as inoperable via keyboard (unreachable by Tab, Enter/Space inactive, despite mouse click handler present).",
   "expected": "axe-core automated scanning against /tc2 must report zero violations, while manual keyboard interaction testing identifies custom control #add-to-cart as inoperable via keyboard (unreachable by Tab, Enter/Space inactive, despite mouse click handler present).",
-  "actual_result": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792776473976/.",
-  "actual": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792776473976/.",
+  "actual_result": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792776773545/.",
+  "actual": "axe-core executed with 0 violations (15 rules passed). Keyboard interaction check identified 1 failure: control #add-to-cart responds to mouse clicks (hasClickHandler=true) but is unreachable by keyboard navigation (reachableByTab=false, tabsPressed=6) and cannot be activated via Enter or Space (enterActivated=false, spaceActivated=false). Captured screenshot and .webm interaction recording under /evidence/tc2-1792776773545/.",
   "evidence": {
-    "auditId": "tc2-1792776473976",
+    "auditId": "tc2-1792776773545",
     "axeSummary": {
       "violationCount": 0,
       "passesCount": 15,
@@ -25,8 +25,8 @@
       "wcagRule": "2.1.1 Keyboard",
       "severity": "serious",
       "selector": "#add-to-cart",
-      "screenshot": "tc2-1792776473976/operability-0.png",
-      "recording": "tc2-1792776473976/keyboard-operability.webm",
+      "screenshot": "tc2-1792776773545/operability-0.png",
+      "recording": "tc2-1792776773545/keyboard-operability.webm",
       "evidence": {
         "selector": "#add-to-cart",
         "html": "<div id=\"add-to-cart\" class=\"btn btn-primary\">Add to cart</div>",
@@ -41,6 +41,6 @@
   },
   "status": "pass",
   "explanation": null,
-  "started_at": "2026-10-23T17:27:53.976Z",
-  "completed_at": "2026-10-23T17:27:55.047Z"
+  "started_at": "2026-10-23T17:32:53.545Z",
+  "completed_at": "2026-10-23T17:32:54.599Z"
 }

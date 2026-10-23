@@ -1,5 +1,5 @@
 {
-  "id": "tr_tc4_1792776478313",
+  "id": "tr_tc4_1792776777834",
   "test_case": "TC4",
   "input": {
     "url": "http://localhost:4000/tc4",
@@ -21,23 +21,23 @@
   "expected_result": "Initial audit against /tc4 (broken state) must detect custom button #add-to-cart is not keyboard operable and log a pending issue for human review. Following fix deployment, retesting the logged issue on the exact same page using the same check must report zero violations and transition the issue to resolved.",
   "actual_result": "Initial audit detected 1 finding for WCAG 2.1.1 Keyboard on #add-to-cart: control is inoperable via keyboard. Created pending issue with screenshot evidence. Issue was approved. Following fix deployment, retest completed with 0 violations and transitioned issue status to resolved.",
   "evidence": {
-    "initialAuditId": "audit_b5462c59-bc26-4302-ae8e-7bad7e9b66e0",
-    "retestAuditId": "audit_0dc9cc26-e485-4f65-ae2e-77fd31a6081d",
+    "initialAuditId": "audit_1f42942a-d599-49af-aa63-f40a7b2b6b9c",
+    "retestAuditId": "audit_b84e9ba4-c25e-412c-bade-82f93c97e472",
     "issueId": "fnd_b40069b209131867",
     "fingerprint": "b40069b209131867",
     "issueStatus": "resolved",
     "initial": {
-      "auditId": "audit_b5462c59-bc26-4302-ae8e-7bad7e9b66e0",
+      "auditId": "audit_1f42942a-d599-49af-aa63-f40a7b2b6b9c",
       "findingsCount": 1,
-      "screenshot": "audit_b5462c59-bc26-4302-ae8e-7bad7e9b66e0/operability-0.png"
+      "screenshot": "audit_1f42942a-d599-49af-aa63-f40a7b2b6b9c/operability-0.png"
     },
     "retest": {
-      "auditId": "audit_0dc9cc26-e485-4f65-ae2e-77fd31a6081d",
+      "auditId": "audit_b84e9ba4-c25e-412c-bade-82f93c97e472",
       "findingsCount": 0,
       "outcome": {
         "status": "pass",
         "evidence": {
-          "auditId": "audit_0dc9cc26-e485-4f65-ae2e-77fd31a6081d",
+          "auditId": "audit_b84e9ba4-c25e-412c-bade-82f93c97e472",
           "url": "http://localhost:4000/tc4",
           "status": "complete",
           "findings": [],
@@ -51,7 +51,7 @@
             }
           ],
           "checkDurations": {
-            "keyboard-operability": 285
+            "keyboard-operability": 284
           },
           "plan": {
             "summary": "Isolated retest plan: executing [keyboard-operability] to verify resolution of reported defect.",
@@ -66,18 +66,18 @@
             {
               "step": "collect",
               "status": "complete",
-              "timestamp": "2026-10-23T17:27:57.851Z",
+              "timestamp": "2026-10-23T17:32:57.389Z",
               "summary": "Collected target URL http://localhost:4000/tc4 and WCAG level AA.",
               "details": {
                 "url": "http://localhost:4000/tc4",
                 "wcagLevel": "AA",
-                "auditId": "audit_0dc9cc26-e485-4f65-ae2e-77fd31a6081d"
+                "auditId": "audit_b84e9ba4-c25e-412c-bade-82f93c97e472"
               }
             },
             {
               "step": "plan",
               "status": "complete",
-              "timestamp": "2026-10-23T17:27:58.009Z",
+              "timestamp": "2026-10-23T17:32:57.532Z",
               "summary": "Isolated retest plan: executing [keyboard-operability] to verify resolution of reported defect.",
               "details": {
                 "plan": {
@@ -94,7 +94,7 @@
             {
               "step": "find",
               "status": "complete",
-              "timestamp": "2026-10-23T17:27:58.310Z",
+              "timestamp": "2026-10-23T17:32:57.832Z",
               "summary": "Identified 0 finding(s) across 1 executed check(s).",
               "details": {
                 "findingsCount": 0,
@@ -109,15 +109,15 @@
             {
               "step": "act",
               "status": "complete",
-              "timestamp": "2026-10-23T17:27:58.310Z",
+              "timestamp": "2026-10-23T17:32:57.832Z",
               "summary": "Audit completed with 0 findings; no issues requiring approval.",
               "details": {
                 "pendingApprovalCount": 0
               }
             }
           ],
-          "startedAt": "2026-10-23T17:27:57.851Z",
-          "completedAt": "2026-10-23T17:27:58.310Z"
+          "startedAt": "2026-10-23T17:32:57.389Z",
+          "completedAt": "2026-10-23T17:32:57.832Z"
         }
       }
     },
@@ -142,8 +142,8 @@
   },
   "status": "pass",
   "explanation": "The fixture page had a real accessibility failure at the initial stage: custom button #add-to-cart was not keyboard operable (WCAG 2.1.1). Fix was applied, and the auditor successfully retested the control with 0 violations and marked the issue resolved.",
-  "started_at": "2026-10-23T17:27:57.254Z",
-  "completed_at": "2026-10-23T17:27:58.313Z",
+  "started_at": "2026-10-23T17:32:56.801Z",
+  "completed_at": "2026-10-23T17:32:57.834Z",
   "expected": "Initial audit against /tc4 (broken state) must detect custom button #add-to-cart is not keyboard operable and log a pending issue for human review. Following fix deployment, retesting the logged issue on the exact same page using the same check must report zero violations and transition the issue to resolved.",
   "actual": "Initial audit detected 1 finding for WCAG 2.1.1 Keyboard on #add-to-cart: control is inoperable via keyboard. Created pending issue with screenshot evidence. Issue was approved. Following fix deployment, retest completed with 0 violations and transitioned issue status to resolved."
 }

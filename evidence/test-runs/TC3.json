@@ -1,5 +1,5 @@
 {
-  "id": "tr_tc3_1792776476414",
+  "id": "tr_tc3_1792776775983",
   "test_case": "TC3",
   "input": {
     "url": "http://localhost:4000/tc3",
@@ -11,18 +11,18 @@
   "expected_result": "Grey text (#hero-caption) displayed over a photo background must be evaluated by sampling screenshot pixels. The measured contrast ratio must fall below the WCAG AA 4.5:1 threshold (~1.69:1) and log 1 contrast finding with pixel coordinates and screenshot evidence.",
   "actual_result": "Measured contrast ratio 1.693164014892572:1 against 4.5:1 threshold on #hero-caption using screenshot background pixel sampling. Produced 1 finding for WCAG 1.4.3 Contrast (Minimum) with screenshot and annotated screenshot evidence.",
   "evidence": {
-    "auditId": "official-tc3-1792776475839",
+    "auditId": "official-tc3-1792776775333",
     "finding": {
       "title": "Insufficient text contrast",
       "wcagRule": "1.4.3 Contrast (Minimum)",
       "severity": "serious",
       "selector": "#hero-caption",
-      "screenshot": "official-tc3-1792776475839/contrast.png",
-      "annotatedScreenshot": "official-tc3-1792776475839/contrast-annotated.png",
+      "screenshot": "official-tc3-1792776775333/contrast.png",
+      "annotatedScreenshot": "official-tc3-1792776775333/contrast-annotated.png",
       "evidence": {
         "screenshot": {
           "kind": "path",
-          "path": "/Users/sukruthasrigadde/stuff/WCAG/evidence/official-tc3-1792776475839/contrast.png",
+          "path": "/Users/sukruthasrigadde/stuff/WCAG/evidence/official-tc3-1792776775333/contrast.png",
           "mimeType": "image/png"
         },
         "text": "Find your quiet place.",
@@ -200,8 +200,8 @@
         "measuredRatio": 1.693164014892572
       }
     },
-    "screenshot": "official-tc3-1792776475839/contrast.png",
-    "annotatedScreenshot": "official-tc3-1792776475839/contrast-annotated.png",
+    "screenshot": "official-tc3-1792776775333/contrast.png",
+    "annotatedScreenshot": "official-tc3-1792776775333/contrast-annotated.png",
     "sampledCoordinates": [
       {
         "x": 231,
@@ -369,8 +369,8 @@
   },
   "status": "pass",
   "explanation": null,
-  "started_at": "2026-10-23T17:27:55.866Z",
-  "completed_at": "2026-10-23T17:27:56.414Z",
+  "started_at": "2026-10-23T17:32:55.352Z",
+  "completed_at": "2026-10-23T17:32:55.983Z",
   "expected": "Grey text (#hero-caption) displayed over a photo background must be evaluated by sampling screenshot pixels. The measured contrast ratio must fall below the WCAG AA 4.5:1 threshold (~1.69:1) and log 1 contrast finding with pixel coordinates and screenshot evidence.",
   "actual": "Measured contrast ratio 1.693164014892572:1 against 4.5:1 threshold on #hero-caption using screenshot background pixel sampling. Produced 1 finding for WCAG 1.4.3 Contrast (Minimum) with screenshot and annotated screenshot evidence."
 }
