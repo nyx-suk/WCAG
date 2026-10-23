@@ -18,6 +18,9 @@ export type {
   ContrastEvidence,
   EvidenceByCheckId,
   RunAudit,
+  TestCaseId,
+  TestRunStatus,
+  TestRunRecord,
 } from "./types";
 
 export {

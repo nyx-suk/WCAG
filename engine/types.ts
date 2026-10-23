@@ -87,3 +87,25 @@ export type AuditResult = {
 };
 
 export type RunAudit = (input: AuditInput) => Promise<AuditResult>;
+
+export type TestCaseId = "TC1" | "TC2" | "TC3" | "TC4";
+export type TestRunStatus = "pass" | "fail" | "incomplete";
+
+export interface TestRunRecord<
+  TInput = unknown,
+  TExpected = unknown,
+  TActual = unknown,
+  TEvidence = unknown,
+> {
+  id: string;
+  test_case: TestCaseId;
+  input: TInput;
+  expected_result: TExpected;
+  actual_result: TActual;
+  evidence: TEvidence;
+  status: TestRunStatus;
+  explanation?: string | null;
+  started_at: string;
+  completed_at: string;
+}
+

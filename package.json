@@ -6,6 +6,7 @@
   "scripts": {
     "fixtures": "tsx fixtures/server.ts",
     "start": "tsx src/server.ts",
+    "tc1": "tsx scripts/run-tc1.ts",
     "verify:tc2": "tsx scripts/verify-tc2-axe-clean.ts",
     "verify:tc3": "tsx scripts/verify-tc3-contrast.ts",
     "verify:tc4": "tsx scripts/verify-tc4-retest.ts",
