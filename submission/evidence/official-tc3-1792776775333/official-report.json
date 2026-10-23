@@ -1,0 +1,376 @@
+{
+  "id": "tr_tc3_1792776775983",
+  "test_case": "TC3",
+  "input": {
+    "url": "http://localhost:4000/tc3",
+    "wcagLevel": "AA",
+    "checks": [
+      "contrast"
+    ]
+  },
+  "expected_result": "Grey text (#hero-caption) displayed over a photo background must be evaluated by sampling screenshot pixels. The measured contrast ratio must fall below the WCAG AA 4.5:1 threshold (~1.69:1) and log 1 contrast finding with pixel coordinates and screenshot evidence.",
+  "actual_result": "Measured contrast ratio 1.693164014892572:1 against 4.5:1 threshold on #hero-caption using screenshot background pixel sampling. Produced 1 finding for WCAG 1.4.3 Contrast (Minimum) with screenshot and annotated screenshot evidence.",
+  "evidence": {
+    "auditId": "official-tc3-1792776775333",
+    "finding": {
+      "title": "Insufficient text contrast",
+      "wcagRule": "1.4.3 Contrast (Minimum)",
+      "severity": "serious",
+      "selector": "#hero-caption",
+      "screenshot": "official-tc3-1792776775333/contrast.png",
+      "annotatedScreenshot": "official-tc3-1792776775333/contrast-annotated.png",
+      "evidence": {
+        "screenshot": {
+          "kind": "path",
+          "path": "/Users/sukruthasrigadde/stuff/WCAG/evidence/official-tc3-1792776775333/contrast.png",
+          "mimeType": "image/png"
+        },
+        "text": "Find your quiet place.",
+        "boundingBox": {
+          "x": 232,
+          "y": 392,
+          "width": 305.953125,
+          "height": 40
+        },
+        "requiredRatio": 4.5,
+        "wcagCriterion": "1.4.3",
+        "samples": [
+          {
+            "x": 231,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 232,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 233,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 234,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 235,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 236,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 237,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 238,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 239,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 240,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 241,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 242,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 243,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 244,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 245,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          },
+          {
+            "x": 246,
+            "y": 391,
+            "rgb": [
+              105,
+              98,
+              91
+            ],
+            "relativeLuminance": 0.12493953574641073
+          }
+        ],
+        "method": "PNG pixel sampling: perimeter and target-box color frequency",
+        "measuredRatio": 1.693164014892572
+      }
+    },
+    "screenshot": "official-tc3-1792776775333/contrast.png",
+    "annotatedScreenshot": "official-tc3-1792776775333/contrast-annotated.png",
+    "sampledCoordinates": [
+      {
+        "x": 231,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 232,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 233,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 234,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 235,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 236,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 237,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 238,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 239,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 240,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 241,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 242,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 243,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 244,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 245,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      },
+      {
+        "x": 246,
+        "y": 391,
+        "rgb": [
+          105,
+          98,
+          91
+        ],
+        "relativeLuminance": 0.12493953574641073
+      }
+    ],
+    "measuredRatio": 1.693164014892572,
+    "requiredRatio": 4.5
+  },
+  "status": "pass",
+  "explanation": null,
+  "started_at": "2026-10-23T17:32:55.352Z",
+  "completed_at": "2026-10-23T17:32:55.983Z",
+  "expected": "Grey text (#hero-caption) displayed over a photo background must be evaluated by sampling screenshot pixels. The measured contrast ratio must fall below the WCAG AA 4.5:1 threshold (~1.69:1) and log 1 contrast finding with pixel coordinates and screenshot evidence.",
+  "actual": "Measured contrast ratio 1.693164014892572:1 against 4.5:1 threshold on #hero-caption using screenshot background pixel sampling. Produced 1 finding for WCAG 1.4.3 Contrast (Minimum) with screenshot and annotated screenshot evidence."
+}

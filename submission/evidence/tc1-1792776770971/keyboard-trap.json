@@ -1,0 +1,23 @@
+{
+  "opener": "#open-newsletter-btn",
+  "tabSequence": [
+    "button#maybe-later-btn \"Maybe later\"",
+    "button#subscribe-btn \"Subscribe\"",
+    "input#newsletter-email \"email\"",
+    "button#maybe-later-btn \"Maybe later\"",
+    "button#subscribe-btn \"Subscribe\"",
+    "input#newsletter-email \"email\"",
+    "Shift+Tab -> button#subscribe-btn \"Subscribe\"",
+    "Shift+Tab -> button#maybe-later-btn \"Maybe later\"",
+    "Shift+Tab -> input#newsletter-email \"email\""
+  ],
+  "cycleDetected": true,
+  "cycleLength": 3,
+  "escapePressed": true,
+  "modalStillOpenAfterEscape": true,
+  "dismissControlsFound": [
+    "#maybe-later-btn",
+    "#subscribe-btn"
+  ],
+  "dismissControlsWorked": false
+}

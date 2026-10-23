@@ -1,0 +1,10 @@
+{
+  "selector": "#add-to-cart",
+  "html": "<div id=\"add-to-cart\" class=\"btn btn-primary\">Add to cart</div>",
+  "cursorPointer": true,
+  "hasClickHandler": true,
+  "reachableByTab": false,
+  "tabsPressed": 6,
+  "enterActivated": false,
+  "spaceActivated": false
+}

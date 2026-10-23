@@ -1,0 +1,180 @@
+{
+  "screenshot": {
+    "kind": "path",
+    "path": "/Users/sukruthasrigadde/stuff/WCAG/evidence/official-tc3-1792776775333/contrast.png",
+    "mimeType": "image/png"
+  },
+  "text": "Find your quiet place.",
+  "boundingBox": {
+    "x": 232,
+    "y": 392,
+    "width": 305.953125,
+    "height": 40
+  },
+  "requiredRatio": 4.5,
+  "wcagCriterion": "1.4.3",
+  "samples": [
+    {
+      "x": 231,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 232,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 233,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 234,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 235,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 236,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 237,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 238,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 239,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 240,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 241,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 242,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 243,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 244,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 245,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    },
+    {
+      "x": 246,
+      "y": 391,
+      "rgb": [
+        105,
+        98,
+        91
+      ],
+      "relativeLuminance": 0.12493953574641073
+    }
+  ],
+  "method": "PNG pixel sampling: perimeter and target-box color frequency",
+  "measuredRatio": 1.693164014892572
+}

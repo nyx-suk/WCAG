@@ -1,0 +1,130 @@
+{
+  "input": {
+    "url": "http://localhost:4000/tc4",
+    "wcagLevel": "AA",
+    "checks": [
+      "keyboard-operability"
+    ],
+    "state": "broken"
+  },
+  "expected": {
+    "findingCount": 1,
+    "issueStatus": "pending_approval"
+  },
+  "actual": {
+    "auditId": "audit_1f42942a-d599-49af-aa63-f40a7b2b6b9c",
+    "url": "http://localhost:4000/tc4",
+    "status": "complete",
+    "findings": [
+      {
+        "title": "Custom control is not keyboard operable",
+        "description": "Custom control '#next-step' responds to mouse clicks but cannot receive keyboard focus or activation. All interactive controls must be operable through a keyboard interface without requiring specific timings.",
+        "wcagRule": "2.1.1 Keyboard",
+        "severity": "serious",
+        "source": "keyboard-operability",
+        "checkId": "keyboard-operability",
+        "selector": "#next-step",
+        "screenshot": "audit_1f42942a-d599-49af-aa63-f40a7b2b6b9c/operability-0.png",
+        "recording": "audit_1f42942a-d599-49af-aa63-f40a7b2b6b9c/keyboard-operability.webm",
+        "fingerprint": "b40069b209131867",
+        "evidence": {
+          "selector": "#next-step",
+          "html": "<div id=\"next-step\" style=\"cursor: pointer\" onclick=\"this.dataset.activated = 'true'\">\n    Continue\n  </div>",
+          "cursorPointer": true,
+          "hasClickHandler": true,
+          "reachableByTab": false,
+          "tabsPressed": 4,
+          "enterActivated": false,
+          "spaceActivated": false
+        }
+      }
+    ],
+    "checksPlanned": [
+      "keyboard-operability"
+    ],
+    "checksExecuted": [
+      {
+        "checkId": "keyboard-operability",
+        "status": "executed"
+      }
+    ],
+    "checkDurations": {
+      "keyboard-operability": 399
+    },
+    "plan": {
+      "summary": "Isolated retest plan: executing [keyboard-operability] to verify resolution of reported defect.",
+      "checks": [
+        {
+          "checkId": "keyboard-operability",
+          "reason": "Verify that custom controls, button-styled elements, and clickable targets can be reached and activated via Tab, Enter, and Space."
+        }
+      ]
+    },
+    "steps": [
+      {
+        "step": "collect",
+        "status": "complete",
+        "timestamp": "2026-10-23T17:32:56.805Z",
+        "summary": "Collected target URL http://localhost:4000/tc4 and WCAG level AA.",
+        "details": {
+          "url": "http://localhost:4000/tc4",
+          "wcagLevel": "AA",
+          "auditId": "audit_1f42942a-d599-49af-aa63-f40a7b2b6b9c"
+        }
+      },
+      {
+        "step": "plan",
+        "status": "complete",
+        "timestamp": "2026-10-23T17:32:56.966Z",
+        "summary": "Isolated retest plan: executing [keyboard-operability] to verify resolution of reported defect.",
+        "details": {
+          "plan": {
+            "summary": "Isolated retest plan: executing [keyboard-operability] to verify resolution of reported defect.",
+            "checks": [
+              {
+                "checkId": "keyboard-operability",
+                "reason": "Verify that custom controls, button-styled elements, and clickable targets can be reached and activated via Tab, Enter, and Space."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "step": "find",
+        "status": "complete",
+        "timestamp": "2026-10-23T17:32:57.382Z",
+        "summary": "Identified 1 finding(s) across 1 executed check(s).",
+        "details": {
+          "findingsCount": 1,
+          "checksExecuted": [
+            {
+              "checkId": "keyboard-operability",
+              "status": "executed"
+            }
+          ]
+        }
+      },
+      {
+        "step": "act",
+        "status": "pending",
+        "timestamp": "2026-10-23T17:32:57.382Z",
+        "summary": "Presenting 1 proposed finding(s) for human review and approval before logging.",
+        "details": {
+          "pendingApprovalCount": 1
+        }
+      }
+    ],
+    "startedAt": "2026-10-23T17:32:56.805Z",
+    "completedAt": "2026-10-23T17:32:57.382Z"
+  },
+  "issue": {
+    "id": "fnd_b40069b209131867",
+    "fingerprint": "b40069b209131867",
+    "status": "pending_approval"
+  },
+  "evidence": {
+    "screenshot": "audit_1f42942a-d599-49af-aa63-f40a7b2b6b9c/operability-0.png"
+  },
+  "verdict": "PASS",
+  "explanation": "Auditor successfully detected the accessibility failure on the broken page and logged a pending issue."
+}

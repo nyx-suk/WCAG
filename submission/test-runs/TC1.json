@@ -1,0 +1,59 @@
+{
+  "id": "tr_tc1_1792776770971",
+  "test_case": "TC1",
+  "input": {
+    "badUrl": "http://localhost:4000/tc1/bad",
+    "goodUrl": "http://localhost:4000/tc1/good",
+    "wcagLevel": "AA",
+    "checks": [
+      "keyboard-trap"
+    ]
+  },
+  "expected_result": "A page containing an open modal dialog creates a genuine keyboard trap. The auditor must detect the trap, prove that keyboard focus cannot exit the modal via Tab/Shift+Tab, confirm that the Escape key fails to dismiss the modal, capture an interaction recording (.webm), and verify that an accessible modal (control) passes with zero findings.",
+  "expected": "A page containing an open modal dialog creates a genuine keyboard trap. The auditor must detect the trap, prove that keyboard focus cannot exit the modal via Tab/Shift+Tab, confirm that the Escape key fails to dismiss the modal, capture an interaction recording (.webm), and verify that an accessible modal (control) passes with zero findings.",
+  "actual_result": "Auditor successfully identified a genuine keyboard trap on /tc1/bad (#newsletter-modal), logging 1 critical finding for WCAG 2.1.2 No Keyboard Trap. Focus movement was tracked across 9 tab steps, detecting a loop of 3 elements (cycleDetected=true). Escape key was pressed but the modal remained open (modalStillOpenAfterEscape=true). Dismiss controls (#maybe-later-btn, #subscribe-btn) were activated via keyboard but failed to dismiss the dialog (dismissControlsWorked=false). Non-empty screenshot and .webm interaction recording were captured under /evidence/tc1-1792776770971/. The control page /tc1/good produced 0 findings with full keyboard exit support.",
+  "actual": "Auditor successfully identified a genuine keyboard trap on /tc1/bad (#newsletter-modal), logging 1 critical finding for WCAG 2.1.2 No Keyboard Trap. Focus movement was tracked across 9 tab steps, detecting a loop of 3 elements (cycleDetected=true). Escape key was pressed but the modal remained open (modalStillOpenAfterEscape=true). Dismiss controls (#maybe-later-btn, #subscribe-btn) were activated via keyboard but failed to dismiss the dialog (dismissControlsWorked=false). Non-empty screenshot and .webm interaction recording were captured under /evidence/tc1-1792776770971/. The control page /tc1/good produced 0 findings with full keyboard exit support.",
+  "evidence": {
+    "badAuditId": "tc1-1792776770971",
+    "goodAuditId": "tc1-control-1792776770971",
+    "finding": {
+      "title": "Keyboard trap in modal dialog",
+      "wcagRule": "2.1.2 No Keyboard Trap",
+      "severity": "critical",
+      "selector": "#newsletter-modal",
+      "screenshot": "tc1-1792776770971/keyboard-trap.png",
+      "recording": "tc1-1792776770971/keyboard-trap.webm",
+      "evidence": {
+        "opener": "#open-newsletter-btn",
+        "tabSequence": [
+          "button#maybe-later-btn \"Maybe later\"",
+          "button#subscribe-btn \"Subscribe\"",
+          "input#newsletter-email \"email\"",
+          "button#maybe-later-btn \"Maybe later\"",
+          "button#subscribe-btn \"Subscribe\"",
+          "input#newsletter-email \"email\"",
+          "Shift+Tab -> button#subscribe-btn \"Subscribe\"",
+          "Shift+Tab -> button#maybe-later-btn \"Maybe later\"",
+          "Shift+Tab -> input#newsletter-email \"email\""
+        ],
+        "cycleDetected": true,
+        "cycleLength": 3,
+        "escapePressed": true,
+        "modalStillOpenAfterEscape": true,
+        "dismissControlsFound": [
+          "#maybe-later-btn",
+          "#subscribe-btn"
+        ],
+        "dismissControlsWorked": false
+      }
+    },
+    "goodResult": {
+      "status": "complete",
+      "findingsCount": 0
+    }
+  },
+  "status": "pass",
+  "explanation": null,
+  "started_at": "2026-10-23T17:32:50.971Z",
+  "completed_at": "2026-10-23T17:32:52.783Z"
+}

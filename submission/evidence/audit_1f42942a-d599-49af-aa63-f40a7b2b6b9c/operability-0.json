@@ -1,0 +1,10 @@
+{
+  "selector": "#next-step",
+  "html": "<div id=\"next-step\" style=\"cursor: pointer\" onclick=\"this.dataset.activated = 'true'\">\n    Continue\n  </div>",
+  "cursorPointer": true,
+  "hasClickHandler": true,
+  "reachableByTab": false,
+  "tabsPressed": 4,
+  "enterActivated": false,
+  "spaceActivated": false
+}
